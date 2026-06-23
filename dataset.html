@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Notes on the Sources · Villain Origins Methodology</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+:root {
+  --paper:      #d8c9a0;
+  --paper-2:    #c9b88a;
+  --paper-3:    #b8a679;
+  --ink:        #2a1f12;
+  --ink-soft:   #4a3a26;
+  --ink-faint:  #756650;
+  --stamp:      #5d6470;
+  --alert:      #b03020;
+  --alert-deep: #7a1f15;
+  --redact:     #1a1410;
+  --rule:       #a89260;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'IBM Plex Mono', monospace;
+  -webkit-font-smoothing: antialiased;
+}
+body {
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(122, 31, 21, 0.06), transparent 70%),
+    radial-gradient(ellipse 80% 60% at 100% 100%, rgba(60, 50, 30, 0.10), transparent 60%),
+    var(--paper);
+  min-height: 100vh; position: relative;
+}
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.16  0 0 0 0 0.12  0 0 0 0 0.07   0 0 0 0.20 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.9; mix-blend-mode: multiply; z-index: 1;
+}
+.wrap { position: relative; z-index: 2; max-width: 1280px; margin: 0 auto; padding: 0 36px; }
+
+/* Cover */
+.cover { position: relative; padding: 36px 0 30px; border-bottom: 2px solid var(--ink-soft); margin-bottom: 30px; }
+.status-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 11px; letter-spacing: 0.22em; font-weight: 600;
+  color: var(--ink); margin-bottom: 24px; padding: 8px 0;
+  border-top: 1px solid var(--ink-soft); border-bottom: 1px solid var(--ink-soft);
+}
+.status-bar .left, .status-bar .right { display: flex; gap: 28px; align-items: center; }
+.status-bar .alert { color: var(--alert); font-weight: 700; }
+.status-bar a { color: var(--ink); text-decoration: none; }
+.status-bar a:hover { color: var(--alert); }
+.case-no { color: var(--ink-faint); }
+
+.cover-hero { display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: flex-end; margin: 22px 0 18px; }
+h1.title {
+  font-family: 'Special Elite', monospace;
+  font-size: clamp(36px, 5.5vw, 78px); line-height: 1.0;
+  color: var(--ink); text-transform: uppercase; font-weight: 400;
+  max-width: 1100px;
+}
+h1.title .alert-word { color: var(--alert); }
+.cover-stamp {
+  font-family: 'Special Elite', monospace;
+  font-size: 13px; letter-spacing: 0.12em;
+  color: var(--alert); border: 2.5px solid var(--alert);
+  padding: 8px 18px 6px; transform: rotate(-3deg);
+  text-align: center; line-height: 1.05; font-weight: 700;
+  opacity: 0.86; flex-shrink: 0; white-space: nowrap;
+}
+.cover-stamp .sub { display: block; font-size: 10px; opacity: 0.85; margin-top: 3px; letter-spacing: 0.2em; }
+
+.synopsis-row {
+  display: grid; grid-template-columns: 220px 1fr; gap: 36px;
+  margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--rule);
+}
+.synopsis-key {
+  font-size: 11px; letter-spacing: 0.25em; font-weight: 600;
+  color: var(--ink-faint); text-transform: uppercase;
+}
+.synopsis-key .v { color: var(--ink); display: block; font-weight: 500; margin-top: 4px; letter-spacing: 0.1em; }
+.synopsis-body {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 17px; line-height: 1.55;
+  color: var(--ink-soft); max-width: 720px;
+}
+
+/* TOC */
+.toc {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0;
+  margin: 26px 0 0;
+  border: 1.5px solid var(--ink-soft);
+  background: rgba(216, 201, 160, 0.4);
+}
+.toc a {
+  padding: 12px 16px;
+  font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+  text-decoration: none; color: var(--ink);
+  border-right: 1px solid var(--ink-soft);
+  transition: background 0.18s;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.toc a:last-child { border-right: 0; }
+.toc a:hover { background: rgba(122, 31, 21, 0.12); }
+.toc a .num { font-family: 'Special Elite', monospace; font-size: 14px; color: var(--alert); }
+.toc a .name { font-weight: 600; color: var(--ink); }
+
+/* Sections */
+.section {
+  position: relative;
+  padding: 50px 0 40px;
+  border-bottom: 1px solid var(--rule);
+}
+.section:last-of-type { border-bottom: 0; }
+.section-num {
+  font-family: 'Special Elite', monospace;
+  font-size: 13px; letter-spacing: 0.3em;
+  color: var(--ink-faint); margin-bottom: 8px;
+}
+.section-label {
+  font-family: 'Special Elite', monospace;
+  font-size: 13px; letter-spacing: 0.32em;
+  color: var(--alert); border: 2px solid var(--alert);
+  padding: 6px 14px 4px; display: inline-block;
+  margin-bottom: 18px; transform: rotate(-1.2deg);
+  font-weight: 700;
+}
+.section h2 {
+  font-family: 'Special Elite', monospace;
+  font-size: clamp(28px, 3.5vw, 48px); line-height: 1.05;
+  color: var(--ink); text-transform: uppercase;
+  font-weight: 400; margin-bottom: 18px;
+}
+.section .lead {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 17px; line-height: 1.6;
+  color: var(--ink-soft); max-width: 760px;
+  margin-bottom: 28px;
+}
+.section p {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 15.5px; line-height: 1.65;
+  color: var(--ink-soft); max-width: 760px;
+  margin-bottom: 16px;
+}
+.section h3 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--alert); margin: 24px 0 12px;
+  font-weight: 700;
+}
+.section p strong, .section li strong { color: var(--ink); }
+.section em { color: var(--alert-deep); }
+.section ul {
+  list-style: none;
+  margin: 6px 0 18px;
+  max-width: 760px;
+}
+.section li {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 15px; line-height: 1.6;
+  color: var(--ink-soft); padding: 4px 0 4px 22px;
+  position: relative;
+}
+.section li::before {
+  content: '·'; position: absolute; left: 6px; top: 4px;
+  color: var(--alert); font-weight: 900; font-size: 18px;
+}
+
+/* Summary stats */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0;
+  border: 1px solid var(--ink-soft);
+  margin: 18px 0 26px;
+  background: rgba(184, 166, 121, 0.18);
+}
+.stat-cell {
+  padding: 18px 16px;
+  border-right: 1px solid var(--ink-soft);
+}
+.stat-cell:last-child { border-right: 0; }
+.stat-cell .label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.28em;
+  color: var(--ink-faint); text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.stat-cell .value {
+  font-family: 'Special Elite', monospace;
+  font-size: 28px; color: var(--ink); line-height: 1;
+}
+.stat-cell .sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--ink-faint); margin-top: 4px;
+}
+
+/* Bar chart frames */
+.chart-frame {
+  background: rgba(184, 166, 121, 0.18);
+  border: 1px solid var(--ink-soft);
+  padding: 24px 18px 12px;
+  margin: 18px 0 28px;
+  position: relative;
+}
+.chart-frame .chart-title {
+  position: absolute; top: -8px; left: 22px;
+  background: var(--paper); padding: 0 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.3em; color: var(--ink-faint);
+}
+.bar-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 100px;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 4px;
+  border-bottom: 1px dashed var(--rule);
+}
+.bar-row:last-child { border-bottom: 0; }
+.bar-row .decade-lbl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px; font-weight: 600;
+  color: var(--ink); letter-spacing: 0.1em;
+}
+.bar-row .bar-wrap { position: relative; height: 22px; }
+.bar-row .bar-bg { position: absolute; inset: 0; background: rgba(60,40,20,0.06); }
+.bar-row .bar-fill {
+  position: absolute; top: 2px; bottom: 2px; left: 0;
+  background: var(--alert); opacity: 0.78;
+  transition: width 0.6s;
+}
+.bar-row .bar-fill.sample { background: var(--ink); opacity: 0.6; }
+.bar-row .value-lbl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; color: var(--ink-soft);
+  text-align: right; letter-spacing: 0.05em;
+}
+.coverage-note {
+  font-family: 'IBM Plex Serif', serif;
+  font-style: italic; font-size: 14px;
+  color: var(--ink-faint); margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--rule);
+}
+
+/* Question callout */
+.callout {
+  background: rgba(176, 48, 32, 0.06);
+  border-left: 4px solid var(--alert);
+  padding: 22px 26px;
+  margin: 18px 0 22px;
+  max-width: 820px;
+}
+.callout .q-mark {
+  font-family: 'Special Elite', monospace;
+  font-size: 11px; letter-spacing: 0.28em;
+  color: var(--alert); margin-bottom: 8px;
+  font-weight: 700;
+}
+.callout .q {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 18px; font-style: italic;
+  color: var(--ink); margin-bottom: 12px;
+  font-weight: 600;
+}
+.callout p { margin-bottom: 10px; font-size: 14.5px; }
+.callout p:last-child { margin-bottom: 0; }
+
+/* Filmography table */
+.filter-bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+  margin: 18px 0 14px;
+  padding: 14px 16px;
+  background: rgba(184, 166, 121, 0.25);
+  border: 1px solid var(--ink-soft);
+  border-left: 3px solid var(--alert);
+}
+.filter-bar .lbl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.filter-bar input, .filter-bar select {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  background: var(--paper);
+  border: 1px solid var(--ink-soft);
+  color: var(--ink);
+  padding: 7px 10px;
+  border-radius: 0;
+  outline: none;
+  letter-spacing: 0.05em;
+}
+.filter-bar input { min-width: 220px; }
+.filter-bar select { min-width: 140px; }
+.filter-bar input:focus, .filter-bar select:focus { border-color: var(--alert); }
+.filter-bar .count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; letter-spacing: 0.18em;
+  color: var(--alert); font-weight: 700;
+  margin-left: auto;
+}
+.film-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.film-table th {
+  text-align: left;
+  font-size: 10px; letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding: 12px 12px 10px;
+  border-bottom: 2px solid var(--ink-soft);
+  background: rgba(184, 166, 121, 0.2);
+}
+.film-table td {
+  padding: 10px 12px;
+  border-bottom: 1px dotted var(--rule);
+  font-size: 13px;
+  color: var(--ink);
+  vertical-align: top;
+}
+.film-table tr:nth-child(even) td { background: rgba(184, 166, 121, 0.08); }
+.film-table .col-year, .film-table .col-decade {
+  font-family: 'IBM Plex Mono', monospace; color: var(--ink-soft);
+  width: 80px;
+}
+.film-table .col-decade { width: 90px; }
+.film-table .col-title { font-family: 'IBM Plex Serif', serif; font-weight: 600; }
+.film-table .col-villain { font-family: 'IBM Plex Serif', serif; font-style: italic; color: var(--ink-soft); }
+.film-table .col-origin { width: 160px; }
+.film-table .origin-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.12em;
+  color: var(--paper); background: var(--alert);
+  text-transform: uppercase;
+}
+.empty {
+  padding: 24px; text-align: center;
+  font-family: 'IBM Plex Serif', serif; font-style: italic;
+  color: var(--ink-faint);
+}
+
+footer {
+  margin-top: 50px; padding: 32px 0 60px;
+  border-top: 2px solid var(--ink-soft);
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 14px; color: var(--ink-soft);
+  line-height: 1.6;
+}
+footer a { color: var(--alert); text-decoration: none; font-weight: 600; }
+.end-mark {
+  text-align: center;
+  font-family: 'Special Elite', monospace;
+  font-size: 13px; letter-spacing: 0.4em;
+  color: var(--ink-faint);
+  padding: 30px 0 10px;
+}
+
+@media (max-width: 720px) {
+  .wrap { padding: 0 20px; }
+  .synopsis-row { grid-template-columns: 1fr; }
+  .cover-hero { grid-template-columns: 1fr; }
+  .filter-bar input { min-width: 0; flex: 1; }
+  .film-table { font-size: 12px; }
+  .film-table th, .film-table td { padding: 8px 6px; }
+  .film-table .col-decade, .film-table .col-year { width: auto; }
+  .film-table .col-origin { width: auto; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- COVER -->
+<header class="cover">
+  <div class="status-bar">
+    <div class="left">
+      <span class="alert">DOCUMENT B</span>
+      <span>//</span>
+      <span>METHODOLOGY</span>
+      <span>//</span>
+      <span>SOURCES &amp; EDGES</span>
+    </div>
+    <div class="right">
+      <a href="index.html">&larr; BACK TO DOSSIER</a>
+    </div>
+  </div>
+
+  <div class="cover-hero">
+    <h1 class="title">Notes on<br/>the <span class="alert-word">Sources.</span></h1>
+    <div class="cover-stamp">
+      DOCUMENT B
+      <span class="sub">METHODOLOGY</span>
+    </div>
+  </div>
+
+  <div class="synopsis-row">
+    <div class="synopsis-key">
+      Subject<span class="v">How the villain-origins<br/>dataset was built</span>
+      <br/><br/>
+      Updated<span class="v">23 JUN 2026</span>
+    </div>
+    <div class="synopsis-body">
+      The dossier next door makes claims about who Hollywood has cast as the bad guy over eight decades. This page is the audit trail behind those claims: how the films were chosen, how origin was tagged, what we deliberately left out, and what we'd add if we could.
+    </div>
+  </div>
+
+  <nav class="toc">
+    <a href="#summary"><span class="num">01</span><span class="name">Summary</span></a>
+    <a href="#scale"><span class="num">02</span><span class="name">Industry context</span></a>
+    <a href="#build"><span class="num">03</span><span class="name">How we built it</span></a>
+    <a href="#hollywood"><span class="num">04</span><span class="name">What counts as Hollywood</span></a>
+    <a href="#origin"><span class="num">05</span><span class="name">Tagging origin</span></a>
+    <a href="#open"><span class="num">06</span><span class="name">Open questions</span></a>
+    <a href="#missing"><span class="num">07</span><span class="name">What's missing</span></a>
+    <a href="#catalog"><span class="num">08</span><span class="name">Full catalog</span></a>
+  </nav>
+</header>
+
+<!-- 01 SUMMARY -->
+<section class="section" id="summary">
+  <div class="section-num">SECTION 01</div>
+  <div class="section-label">SUMMARY</div>
+  <h2>The dataset, at a glance</h2>
+  <p class="lead">
+    We tagged the primary antagonist in roughly five hundred Hollywood films, 1940 to early 2025, by country of origin. That sample is the entire substrate of every chart in the dossier. Below are the headline numbers.
+  </p>
+  <div class="stat-grid" id="stat-grid"></div>
+  <p>
+    A few things are worth being honest about up front. The sample is not a random draw; it's a curated set of films we judged well enough known to count. It skews to wide releases, Oscar nominees, and films that made it into the cultural memory; it under-represents direct-to-video, niche horror, and most non-English-language releases. The Hollywood industry made many tens of thousands of films across this period &mdash; the comparison below shows the gap.
+  </p>
+</section>
+
+<!-- 02 INDUSTRY CONTEXT -->
+<section class="section" id="scale">
+  <div class="section-num">SECTION 02</div>
+  <div class="section-label">INDUSTRY CONTEXT</div>
+  <h2>What the industry actually produced</h2>
+  <p class="lead">
+    Two reference charts. The first is the approximate total of US theatrical releases per decade. The second is the rough domestic box office Hollywood pulled in across the same period. Our sample is the gray bar inside the red one.
+  </p>
+
+  <div class="chart-frame">
+    <div class="chart-title">US THEATRICAL RELEASES PER DECADE</div>
+    <div id="releases-chart"></div>
+    <div class="coverage-note" id="releases-note"></div>
+  </div>
+
+  <div class="chart-frame">
+    <div class="chart-title">DOMESTIC BOX OFFICE PER DECADE · $B</div>
+    <div id="boxoffice-chart"></div>
+    <div class="coverage-note">
+      Pre-1970 box office figures are inflation-noisy and approximate. Post-2020 figures reflect a structural shift to streaming and a COVID-era theatrical contraction.
+    </div>
+  </div>
+
+  <p>
+    Two takeaways. First, the industry's output is roughly four to eight times what we sampled in every decade, sometimes more. Second, the sample's <em>weight</em> &mdash; how culturally loud the films we chose were &mdash; is much closer to representative than the count suggests. Most decades' tentpole films are in here. The thousands we left out are mostly films you've never heard of.
+  </p>
+</section>
+
+<!-- 03 HOW BUILT -->
+<section class="section" id="build">
+  <div class="section-num">SECTION 03</div>
+  <div class="section-label">HOW WE BUILT IT</div>
+  <h2>The process</h2>
+  <p class="lead">
+    There was no scrape and no API call. The dataset was assembled by hand, then iterated.
+  </p>
+  <h3>Initial pass</h3>
+  <p>
+    First, brainstorm: by decade, list the films you can name that have a clear primary antagonist. Bias toward films that won Oscars, did big box office, became franchises, or are routinely cited on best-of lists (AFI, BFI, Sight &amp; Sound, IMDb top 250, Rotten Tomatoes critics' lists).
+  </p>
+  <h3>Origin tag</h3>
+  <p>
+    For each film, write down who the primary villain is and what country that person belongs to. For films where the villain is the Soviet Union, the German army, or "Al-Qaeda," the country tag is the obvious one. For films where the villain is a corporation, a cult, or a serial killer, the country tag is wherever the action is set (almost always the US).
+  </p>
+  <h3>Iteration</h3>
+  <p>
+    The first pass missed a lot. We added films when we noticed a decade was thin, when we remembered a franchise we'd skipped, or when a category looked off (e.g., the 1950s Red Scare was visibly under-represented after the first pass).
+  </p>
+  <h3>What got cleaned up</h3>
+  <p>
+    A second pass removed duplicates (films double-listed in two categories), films with the wrong year, films that aren't actually Hollywood (some Australian/UK productions), and a handful of TV miniseries that slipped in.
+  </p>
+</section>
+
+<!-- 04 WHAT COUNTS -->
+<section class="section" id="hollywood">
+  <div class="section-num">SECTION 04</div>
+  <div class="section-label">WHAT COUNTS AS HOLLYWOOD</div>
+  <h2>Inclusion criteria</h2>
+  <p class="lead">
+    "Hollywood" is fuzzy at the edges. Here's what we're using as the operational rule.
+  </p>
+  <ul>
+    <li><strong>US-financed or US-distributed theatrical films.</strong> The major and mini-major studios, plus Sundance-style indies that got wide US distribution.</li>
+    <li><strong>Wide release, mostly.</strong> If a film opened in fewer than ~50 theaters and made under $1M, it's probably not here even if it's good.</li>
+    <li><strong>1940 through early 2025.</strong> The 2020s decade is partial &mdash; through about 2024.</li>
+    <li><strong>No TV, no streaming-originals (mostly).</strong> A few exceptions where the line is genuinely blurry: prestige Netflix/Apple films that played in theaters for an Oscar qualification.</li>
+    <li><strong>International co-productions are in</strong> if the financing and distribution are mostly American (so e.g., the Bond films count; <em>Crouching Tiger</em> doesn't).</li>
+    <li><strong>Documentaries are out.</strong> Animation is in.</li>
+  </ul>
+</section>
+
+<!-- 05 ORIGIN -->
+<section class="section" id="origin">
+  <div class="section-num">SECTION 05</div>
+  <div class="section-label">TAGGING ORIGIN</div>
+  <h2>How we decide where the villain is from</h2>
+  <p class="lead">
+    Origin is the hardest call. The dataset uses eleven buckets: Germany, Russia/USSR, Middle East, North Korea, China, Japan, the UK, Latin America, USA (domestic), Vietnam, and Non-national.
+  </p>
+  <h3>The rule</h3>
+  <p>
+    Tag the primary antagonist's country &mdash; the one most viewers would associate with the threat. For Hans Gruber, that's Germany. For Drago, Russia. For Hannibal Lecter, the USA. For Sauron, Non-national.
+  </p>
+  <h3>Regional categories</h3>
+  <p>
+    Some categories collapse multiple countries. The Middle East category includes Iran, Iraq, Afghanistan, Saudi Arabia, Israel, Palestine, Libya, Syria, Pakistan, and a few generic-Arab fictional states. Latin America includes Mexico, Cuba, Colombia, El Salvador, and Brazil. The world map exhibit spreads regional counts across the actual countries; the other exhibits keep them grouped.
+  </p>
+  <h3>Non-national</h3>
+  <p>
+    Aliens, AI, monsters, ghosts, ancient demons, animals, and abstract evils (grief, ambition, time) all get tagged Non-national. <em>Jaws</em>, the Terminator, Pennywise, and Thanos all live here. So do, perhaps controversially, films where the villain is the human condition itself (e.g., <em>Manchester by the Sea</em>'s grief).
+  </p>
+  <h3>Ambiguous cases</h3>
+  <p>
+    A few villains genuinely defy a single flag. We place them where most viewers locate them:
+  </p>
+  <ul>
+    <li><strong>Keyser Söze</strong> &mdash; described as Hungarian-Turkish; we tag <em>The Usual Suspects</em> as USA because the crime is American and the film is read as a noir about American criminals.</li>
+    <li><strong>Le Chiffre</strong> &mdash; a stateless banker; we tag <em>Casino Royale</em> as Non-national.</li>
+    <li><strong>Hans Gruber</strong> &mdash; a German "terrorist for hire" in <em>Die Hard</em>. Germany.</li>
+    <li><strong>Solomon Lane</strong> in the MI films &mdash; British MI6 alumnus running a Syndicate; we tag UK.</li>
+  </ul>
+</section>
+
+<!-- 06 OPEN QUESTIONS -->
+<section class="section" id="open">
+  <div class="section-num">SECTION 06</div>
+  <div class="section-label">OPEN QUESTIONS</div>
+  <h2>Things we're not sure about</h2>
+
+  <div class="callout">
+    <div class="q-mark">QUESTION 01</div>
+    <div class="q">Should we drop films where the villain is American?</div>
+    <p>
+      About 17% of our sample (88 of 500 films) have a domestic American villain. They dominate every chart after the 1970s. There's a legitimate argument for cutting them: the visualization is about Hollywood's view of the foreign Other, and including <em>The Wolf of Wall Street</em> alongside <em>Rocky IV</em> arguably mixes two different stories.
+    </p>
+    <p>
+      We kept them in. The biggest argument is that the same anxiety machinery produces both kinds of villain. The rise of the corporate raider on screen in the late 1980s is a story about American self-image just as much as Drago is a story about Soviets, and they coexisted in the same year. Dropping US villains would erase one of the most interesting findings: that America's loudest screen enemy has been America since the 1970s.
+    </p>
+    <p>
+      A reasonable compromise &mdash; not yet implemented &mdash; would be a toggle in the streamgraph that lets the reader hide US villains.
+    </p>
+  </div>
+
+  <div class="callout">
+    <div class="q-mark">QUESTION 02</div>
+    <div class="q">How do you decide what's <em>in</em> the dataset at all?</div>
+    <p>
+      Honest answer: there's no objective rule. The criteria above (wide release, Oscar / box office / cultural recognition, identifiable primary antagonist) are guidelines, not bright lines. The 1970s probably should include more horror; the 1990s probably has too many art-house dramas. We expanded categories that looked thin in earlier passes, which is a kind of bias: the more we noticed a gap, the more we filled it.
+    </p>
+    <p>
+      If we had infinite time, the more rigorous approach would be: pull every wide-release US film from a database (TMDB, IMDb), sample stratified by year and box office, tag the primary villain from synopses and Wikipedia, then weight by box office or recognition. We didn't do that; we did this. The dataset is most defensible as <em>"films a reasonably well-read viewer can name."</em>
+    </p>
+  </div>
+
+  <div class="callout">
+    <div class="q-mark">QUESTION 03</div>
+    <div class="q">Why is China underrepresented &mdash; bias or reality?</div>
+    <p>
+      Reality, mostly. The dossier's <a href="index.html#exhibit-e" style="color:var(--alert);font-weight:600;text-decoration:none">Exhibit 5</a> walks through it: Hollywood needed China at the box office from the mid-2010s on, and studios that wanted import approval had every incentive to scrub Chinese villains. The dataset is faithful to what the screen actually showed.
+    </p>
+    <p>
+      But there's a sample concern too. We may have missed some lower-profile films with Chinese villains that we don't remember. If you have candidates, the right place to add them is the <a href="https://github.com/lshreyas/villain-origins" style="color:var(--alert);font-weight:600;text-decoration:none">repo</a>.
+    </p>
+  </div>
+</section>
+
+<!-- 07 MISSING -->
+<section class="section" id="missing">
+  <div class="section-num">SECTION 07</div>
+  <div class="section-label">WHAT'S MISSING</div>
+  <h2>Things we'd add</h2>
+  <p class="lead">
+    A few enrichments would make this dataset substantially better. None are in yet.
+  </p>
+  <ul>
+    <li><strong>IMDb / Rotten Tomatoes scores.</strong> Would let us weight by quality, distinguish forgotten clunkers from canon, and check whether bad villain choices correlate with bad films.</li>
+    <li><strong>Box office, per film.</strong> Same idea: weight by cultural footprint. <em>Rocky IV</em> and a barely-released 80s thriller should not count equally.</li>
+    <li><strong>Secondary antagonists.</strong> We only track the primary. <em>The Avengers</em> tagged as Non-national (Loki) misses the entire Hydra plotline.</li>
+    <li><strong>Cast nationality and political context.</strong> Whether a villain is played by an actual Russian actor vs. a stage Russian accent is a different signal.</li>
+    <li><strong>TV and streaming series.</strong> The villain shape of <em>Homeland</em>, <em>The Americans</em>, <em>Killing Eve</em>, <em>24</em> would be very informative.</li>
+    <li><strong>Synopsis-level NLP.</strong> Pull every Wikipedia plot summary in this era, identify the antagonist with a language model, tag origin automatically, then human-check. We didn't.</li>
+  </ul>
+</section>
+
+<!-- 08 CATALOG -->
+<section class="section" id="catalog">
+  <div class="section-num">SECTION 08</div>
+  <div class="section-label">FULL CATALOG</div>
+  <h2>Every film in the dataset</h2>
+  <p class="lead">
+    Filter, search, or scroll. This is the entire substrate; everything in the dossier is computed from these rows.
+  </p>
+  <div class="filter-bar">
+    <span class="lbl">Search</span>
+    <input type="text" id="search-input" placeholder="Film or villain…" />
+    <span class="lbl">Decade</span>
+    <select id="decade-select"><option value="">All decades</option></select>
+    <span class="lbl">Origin</span>
+    <select id="origin-select"><option value="">All origins</option></select>
+    <span class="count" id="result-count"></span>
+  </div>
+  <table class="film-table">
+    <thead>
+      <tr>
+        <th class="col-decade">Decade</th>
+        <th class="col-year">Year</th>
+        <th class="col-title">Film</th>
+        <th class="col-villain">Primary villain</th>
+        <th class="col-origin">Origin</th>
+      </tr>
+    </thead>
+    <tbody id="film-tbody"></tbody>
+  </table>
+</section>
+
+<footer>
+  Generated for the <a href="index.html">villain-origins dossier</a>. Source on <a href="https://github.com/lshreyas/villain-origins">GitHub</a>. Built with D3.js. Industry release counts and box office figures are best-effort estimates from public reporting (MPAA THEME, Box Office Mojo, Wikipedia). The dataset is hand-curated and acknowledged to be incomplete; contributions welcome.
+</footer>
+<div class="end-mark">/ /  END OF DOCUMENT  / /</div>
+
+</div>
+
+<script src="films.js"></script>
+<script>
+// =========================================================
+// 01 — Summary stats
+// =========================================================
+(function buildSummary(){
+  const totalFilms = decades.reduce((s, d) => s + keys.reduce((sk, k) => sk + ((films[d.id] && films[d.id][k]) ? films[d.id][k].length : 0), 0), 0);
+  const totalIndustry = Object.values(industryContext).reduce((s, x) => s + x.releases, 0);
+  const usCount = decades.reduce((s, d) => s + ((films[d.id] && films[d.id].USA) ? films[d.id].USA.length : 0), 0);
+  const nonNatCount = decades.reduce((s, d) => s + ((films[d.id] && films[d.id].Other) ? films[d.id].Other.length : 0), 0);
+  const coverage = ((totalFilms / totalIndustry) * 100).toFixed(2);
+
+  const stats = [
+    { label: "Films in sample", value: totalFilms, sub: "primary antagonists tagged" },
+    { label: "Origins tracked", value: keys.length, sub: "incl. Non-national bucket" },
+    { label: "Decades covered", value: decades.length, sub: "1940s through 2020s" },
+    { label: "US theatrical (est.)", value: totalIndustry.toLocaleString(), sub: "1940 – 2024 total" },
+    { label: "Sample coverage", value: coverage + "%", sub: "of industry output" },
+    { label: "US-domestic share", value: ((usCount / totalFilms) * 100).toFixed(0) + "%", sub: usCount + " films" },
+    { label: "Non-national share", value: ((nonNatCount / totalFilms) * 100).toFixed(0) + "%", sub: nonNatCount + " films" }
+  ];
+  const grid = document.getElementById("stat-grid");
+  stats.forEach(s => {
+    const cell = document.createElement("div");
+    cell.className = "stat-cell";
+    cell.innerHTML = `<div class="label">${s.label}</div><div class="value">${s.value}</div><div class="sub">${s.sub}</div>`;
+    grid.appendChild(cell);
+  });
+})();
+
+// =========================================================
+// 02 — Industry context bar charts
+// =========================================================
+(function buildIndustryCharts(){
+  const releasesData = decades.map(d => ({
+    id: d.id, label: d.label,
+    industry: industryContext[d.id].releases,
+    sample: keys.reduce((s, k) => s + ((films[d.id] && films[d.id][k]) ? films[d.id][k].length : 0), 0),
+    boxOffice: industryContext[d.id].boxOfficeBn,
+    note: industryContext[d.id].note
+  }));
+
+  // Releases chart
+  const relMax = d3.max(releasesData, d => d.industry);
+  const relRoot = document.getElementById("releases-chart");
+  releasesData.forEach(d => {
+    const row = document.createElement("div");
+    row.className = "bar-row";
+    row.innerHTML = `
+      <div class="decade-lbl">${d.label}</div>
+      <div class="bar-wrap">
+        <div class="bar-bg"></div>
+        <div class="bar-fill" style="width: ${(d.industry / relMax) * 100}%; opacity: 0.22;"></div>
+        <div class="bar-fill sample" style="width: ${(d.sample / relMax) * 100}%;"></div>
+      </div>
+      <div class="value-lbl">${d.industry.toLocaleString()} / ${d.sample}</div>
+    `;
+    relRoot.appendChild(row);
+  });
+  document.getElementById("releases-note").innerHTML = `
+    Red bar = approximate US theatrical releases that decade. Gray bar = our sample within it.
+    Across the whole period our sample covers roughly 1–2% of all theatrical output by count, but is heavily biased toward the films viewers actually remember.
+  `;
+
+  // Box office chart
+  const boMax = d3.max(releasesData, d => d.boxOffice);
+  const boRoot = document.getElementById("boxoffice-chart");
+  releasesData.forEach(d => {
+    const row = document.createElement("div");
+    row.className = "bar-row";
+    row.innerHTML = `
+      <div class="decade-lbl">${d.label}</div>
+      <div class="bar-wrap">
+        <div class="bar-bg"></div>
+        <div class="bar-fill" style="width: ${(d.boxOffice / boMax) * 100}%;"></div>
+      </div>
+      <div class="value-lbl">$${d.boxOffice.toFixed(0)}B</div>
+    `;
+    boRoot.appendChild(row);
+  });
+})();
+
+// =========================================================
+// 08 — Filmography table with filters
+// =========================================================
+(function buildCatalog(){
+  // Flatten all films
+  const all = [];
+  decades.forEach(d => {
+    Object.entries(films[d.id] || {}).forEach(([k, list]) => {
+      list.forEach(([title, year, villain]) => all.push({
+        decade: d.label, decadeId: d.id, year, title, villain, origin: k
+      }));
+    });
+  });
+
+  const colorMap = colors;
+  const decadeSelect = document.getElementById("decade-select");
+  decades.forEach(d => {
+    const o = document.createElement("option");
+    o.value = d.id; o.textContent = d.label;
+    decadeSelect.appendChild(o);
+  });
+  const originSelect = document.getElementById("origin-select");
+  keys.forEach(k => {
+    const o = document.createElement("option");
+    o.value = k; o.textContent = fullNames[k] || k;
+    originSelect.appendChild(o);
+  });
+
+  const tbody = document.getElementById("film-tbody");
+  const countEl = document.getElementById("result-count");
+  const searchInput = document.getElementById("search-input");
+
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+
+  function render(){
+    const search = searchInput.value.trim().toLowerCase();
+    const decadeFilter = decadeSelect.value;
+    const originFilter = originSelect.value;
+    const matches = all.filter(f =>
+      (!decadeFilter || f.decadeId === decadeFilter) &&
+      (!originFilter || f.origin === originFilter) &&
+      (!search || f.title.toLowerCase().includes(search) || f.villain.toLowerCase().includes(search))
+    );
+    matches.sort((a, b) => a.year - b.year || a.title.localeCompare(b.title));
+    countEl.textContent = matches.length + " of " + all.length + " films";
+
+    if (!matches.length){
+      tbody.innerHTML = `<tr><td colspan="5" class="empty">No films match the current filters.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = matches.map(f => `
+      <tr>
+        <td class="col-decade">${f.decade}</td>
+        <td class="col-year">${f.year}</td>
+        <td class="col-title">${escapeHtml(f.title)}</td>
+        <td class="col-villain">${escapeHtml(f.villain)}</td>
+        <td class="col-origin"><span class="origin-chip" style="background:${colorMap[f.origin]}">${escapeHtml(fullNames[f.origin] || f.origin)}</span></td>
+      </tr>
+    `).join("");
+  }
+
+  searchInput.addEventListener("input", render);
+  decadeSelect.addEventListener("change", render);
+  originSelect.addEventListener("change", render);
+  render();
+})();
+</script>
+</body>
+</html>
