@@ -3,492 +3,838 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>The Changing Face of the Villain</title>
+<title>The Changing Face of the Villain · A Dossier</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
 <style>
-  :root {
-    --bg: #0a0a10;
-    --bg-soft: #14141d;
-    --panel: #141420;
-    --ink: #f5f1e8;
-    --ink-dim: #a89e8c;
-    --ink-faint: #555064;
-    --line: #2a2837;
-    --accent: #e9c46a;
-    --accent-warm: #f0a868;
-    --accent-blood: #e63946;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body {
-    background: var(--bg);
-    color: var(--ink);
-    font-family: 'Inter', system-ui, sans-serif;
-    overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
-  }
-  body {
-    background:
-      radial-gradient(ellipse 70% 50% at 20% -10%, rgba(230, 57, 70, 0.10), transparent 60%),
-      radial-gradient(ellipse 60% 40% at 90% 60%, rgba(106, 142, 174, 0.08), transparent 60%),
-      radial-gradient(ellipse 100% 60% at 50% 100%, rgba(233, 196, 106, 0.05), transparent 70%),
-      var(--bg);
-    min-height: 100vh;
-    padding: 60px 40px 100px;
-    position: relative;
-  }
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    pointer-events: none;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.3   0 0 0 0 0.28   0 0 0 0 0.22   0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-    opacity: 0.55;
-    mix-blend-mode: overlay;
-    z-index: 999;
-  }
-  .container { max-width: 1500px; margin: 0 auto; position: relative; }
-  .eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.4em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 22px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .eyebrow::before, .eyebrow::after {
-    content: '';
-    height: 1px;
-    background: var(--accent);
-    opacity: 0.4;
-    flex: 0 0 32px;
-  }
-  .eyebrow::after { flex: 1; opacity: 0.15; max-width: 400px; }
-  h1 {
-    font-family: 'Playfair Display', serif;
-    font-weight: 900;
-    font-size: clamp(44px, 7vw, 104px);
-    line-height: 0.92;
-    letter-spacing: -0.025em;
-    margin-bottom: 28px;
-    max-width: 1200px;
-  }
-  h1 .accent {
-    font-style: italic;
-    font-weight: 400;
-    background: linear-gradient(120deg, var(--accent) 0%, var(--accent-warm) 50%, var(--accent-blood) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    padding-right: 0.1em;
-  }
-  h1 .underline {
-    display: inline-block;
-    position: relative;
-  }
-  h1 .underline::after {
-    content: '';
-    position: absolute;
-    left: 0; right: 0;
-    bottom: 0.05em;
-    height: 3px;
-    background: linear-gradient(90deg, var(--accent-blood), var(--accent), transparent);
-    opacity: 0.7;
-  }
-  .deck {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-weight: 400;
-    font-size: clamp(18px, 1.7vw, 24px);
-    color: var(--ink-dim);
-    max-width: 780px;
-    line-height: 1.5;
-    margin-bottom: 60px;
-  }
-  .chart-section {
-    position: relative;
-    background: linear-gradient(180deg, rgba(20,20,32,0.4) 0%, rgba(10,10,16,0.2) 100%);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    padding: 30px 20px 20px;
-    margin-bottom: 30px;
-  }
-  .chart-section::before, .chart-section::after {
-    content: '';
-    position: absolute; pointer-events: none;
-    width: 16px; height: 16px;
-    border: 1px solid var(--accent);
-    opacity: 0.5;
-  }
-  .chart-section::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
-  .chart-section::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
-  .chart-wrap { position: relative; width: 100%; }
-  svg { display: block; width: 100%; height: auto; overflow: visible; }
-  .layer {
-    transition: opacity 0.35s ease, filter 0.35s ease;
-    cursor: pointer;
-  }
-  .chart-wrap.hovering .layer { opacity: 0.15; filter: saturate(0.4); }
-  .chart-wrap.hovering .layer.active { opacity: 1; filter: saturate(1.15) brightness(1.05); }
-  .chart-wrap .layer.locked { opacity: 1 !important; filter: saturate(1.2) brightness(1.08) !important; }
-  .chart-wrap.has-locked .layer:not(.locked) { opacity: 0.12 !important; filter: saturate(0.3) !important; }
-  .stream-label {
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
-    fill: var(--ink);
-    pointer-events: none;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
-    letter-spacing: 0.05em;
-  }
-  .stream-label.dark { fill: #14171f; text-shadow: none; }
-  .stream-label.italic {
-    font-style: italic;
-    font-weight: 400;
-    letter-spacing: 0.02em;
-  }
-  .era-band {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    fill: var(--ink-faint);
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-  }
-  .era-rule { stroke: var(--ink-faint); stroke-width: 1; opacity: 0.4; }
-  .decade-tick {
-    font-family: 'JetBrains Mono', monospace;
-    fill: var(--ink-dim);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.15em;
-    cursor: pointer;
-    transition: fill 0.2s;
-  }
-  .decade-tick:hover { fill: var(--accent); }
-  .decade-tick.active { fill: var(--accent); font-weight: 600; }
-  .decade-count {
-    font-family: 'JetBrains Mono', monospace;
-    fill: var(--ink-faint);
-    font-size: 10px;
-    letter-spacing: 0.1em;
-  }
-  .axis-line { stroke: var(--ink-faint); stroke-width: 1; opacity: 0.6; }
-  .event-line { stroke: var(--ink-faint); stroke-width: 1; stroke-dasharray: 2 5; opacity: 0.7; }
-  .event-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    fill: var(--ink-dim);
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-  }
-  .event-label .year { fill: var(--accent); font-weight: 600; }
-  .playhead-line { stroke: var(--accent); stroke-width: 1.5; opacity: 0; pointer-events: none; }
-  .playhead-label {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-weight: 700;
-    fill: var(--accent);
-    font-size: 24px;
-    pointer-events: none;
-    opacity: 0;
-  }
+/* =========================================================
+   DOSSIER · COLD WAR DECLASSIFIED design system
+   ========================================================= */
+:root {
+  --paper:      #d8c9a0;
+  --paper-2:    #c9b88a;
+  --paper-3:    #b8a679;
+  --ink:        #2a1f12;
+  --ink-soft:   #4a3a26;
+  --ink-faint:  #756650;
+  --stamp:      #5d6470;
+  --alert:      #b03020;
+  --alert-deep: #7a1f15;
+  --redact:     #1a1410;
+  --rule:       #a89260;
+  --hatch:      #8f7c4a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'IBM Plex Mono', monospace;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+body {
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(122, 31, 21, 0.06), transparent 70%),
+    radial-gradient(ellipse 80% 60% at 100% 100%, rgba(60, 50, 30, 0.10), transparent 60%),
+    var(--paper);
+  min-height: 100vh;
+  position: relative;
+}
+/* paper grain — fixed, very subtle */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.16  0 0 0 0 0.12  0 0 0 0 0.07   0 0 0 0.20 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.9;
+  mix-blend-mode: multiply;
+  z-index: 1;
+}
+/* fold creases — faint horizontal/vertical seams */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent 33.3%, rgba(60,40,20,0.08) 33.3%, transparent 33.6%),
+    linear-gradient(180deg, transparent 66.6%, rgba(60,40,20,0.06) 66.6%, transparent 66.9%);
+  z-index: 1;
+}
 
-  /* Control bar */
-  .control-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin-bottom: 30px;
-    padding: 18px 24px;
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-  }
-  .control-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    margin-right: 10px;
-  }
-  .decade-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    align-items: center;
-  }
-  .pill {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    padding: 7px 14px;
-    background: transparent;
-    border: 1px solid var(--line);
-    color: var(--ink-dim);
-    cursor: pointer;
-    letter-spacing: 0.1em;
-    transition: all 0.18s;
-    border-radius: 2px;
-  }
-  .pill:hover { color: var(--ink); border-color: var(--ink-faint); }
-  .pill.active {
-    color: var(--bg);
-    background: var(--accent);
-    border-color: var(--accent);
-    font-weight: 600;
-  }
-  .clear-btn {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    background: transparent;
-    border: 1px solid var(--line);
-    padding: 8px 14px;
-    cursor: pointer;
-    transition: all 0.18s;
-    border-radius: 2px;
-  }
-  .clear-btn:hover { color: var(--ink); border-color: var(--ink-faint); }
-  .clear-btn.visible { color: var(--accent); border-color: var(--accent); }
+.wrap { position: relative; z-index: 2; max-width: 1480px; margin: 0 auto; padding: 0 36px; }
 
-  /* Detail panel */
-  .panel {
-    background: linear-gradient(180deg, var(--panel) 0%, rgba(10,10,16,0.6) 100%);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    padding: 36px 40px 40px;
-    margin-bottom: 30px;
-    position: relative;
-    min-height: 400px;
-  }
-  .panel::before, .panel::after {
-    content: '';
-    position: absolute;
-    width: 16px; height: 16px;
-    border: 1px solid var(--accent);
-    opacity: 0.3;
-  }
-  .panel::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
-  .panel::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
-  .panel-header {
-    display: flex;
-    align-items: baseline;
-    gap: 24px;
-    margin-bottom: 8px;
-    flex-wrap: wrap;
-  }
-  .panel-title {
-    font-family: 'Playfair Display', serif;
-    font-weight: 900;
-    font-size: clamp(36px, 4.5vw, 64px);
-    line-height: 1;
-    letter-spacing: -0.02em;
-    color: var(--ink);
-  }
-  .panel-title .accent { color: var(--accent); font-style: italic; font-weight: 400; }
-  .panel-sub {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-  }
-  .panel-deck {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    color: var(--ink-dim);
-    font-size: 17px;
-    line-height: 1.5;
-    max-width: 720px;
-    margin-bottom: 32px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--line);
-  }
-  .country-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 28px;
-  }
-  .country-card {
-    border-left: 3px solid var(--c-color, var(--accent));
-    padding: 4px 0 4px 18px;
-  }
-  .country-card .name-row {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 14px;
-    gap: 10px;
-  }
-  .country-card .name {
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
-    font-size: 19px;
-    color: var(--ink);
-    letter-spacing: 0.02em;
-  }
-  .country-card .count {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    color: var(--c-color, var(--accent));
-    font-weight: 500;
-  }
-  .film-list { list-style: none; }
-  .film-item {
-    display: grid;
-    grid-template-columns: 40px 1fr;
-    gap: 10px;
-    padding: 8px 0;
-    border-top: 1px solid var(--line);
-    font-size: 13.5px;
-    line-height: 1.4;
-  }
-  .film-item:first-child { border-top: 0; }
-  .film-item .year {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--ink-faint);
-    letter-spacing: 0.05em;
-    padding-top: 2px;
-  }
-  .film-item .meta { display: flex; flex-direction: column; gap: 2px; }
-  .film-item .title { color: var(--ink); font-weight: 500; }
-  .film-item .villain { color: var(--ink-dim); font-style: italic; font-size: 12.5px; }
-  .empty-state {
-    color: var(--ink-faint);
-    font-style: italic;
-    font-family: 'Playfair Display', serif;
-    font-size: 16px;
-    padding: 40px 0;
-    text-align: center;
-  }
+/* =========================================================
+   HEADER — DOSSIER COVER
+   ========================================================= */
+.cover {
+  position: relative;
+  padding: 36px 0 30px;
+  border-bottom: 2px solid var(--ink-soft);
+  margin-bottom: 30px;
+}
+.status-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 11px; letter-spacing: 0.22em; font-weight: 600;
+  color: var(--ink); margin-bottom: 24px; padding: 8px 0;
+  border-top: 1px solid var(--ink-soft);
+  border-bottom: 1px solid var(--ink-soft);
+}
+.status-bar .left, .status-bar .right { display: flex; gap: 28px; align-items: center; }
+.status-bar .alert { color: var(--alert); font-weight: 700; }
+.case-no { color: var(--ink-faint); }
 
-  /* Country mode (across decades) */
-  .timeline-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 24px;
-  }
-  .timeline-decade-card {
-    border-top: 1px solid var(--line);
-    padding-top: 16px;
-  }
-  .timeline-decade-card .decade-name {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 12px;
-  }
+.cover-hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 40px;
+  align-items: flex-end;
+  margin: 22px 0 18px;
+  position: relative;
+}
+h1.title {
+  font-family: 'Special Elite', 'Courier Prime', monospace;
+  font-size: clamp(36px, 5.5vw, 78px);
+  line-height: 1.0;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  text-transform: uppercase;
+  font-weight: 400;
+  max-width: 1100px;
+}
+h1.title .ribbon {
+  display: inline-block;
+  background: var(--redact);
+  color: var(--paper);
+  padding: 0 0.18em 0.04em;
+  margin: 0 0.05em;
+  position: relative;
+}
+h1.title .alert-word {
+  color: var(--alert);
+}
 
-  /* Footer */
-  .footer {
-    margin-top: 30px;
-    padding-top: 32px;
-    border-top: 1px solid var(--line);
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 36px;
-    color: var(--ink-dim);
-    font-size: 13px;
-    line-height: 1.6;
-  }
-  .footer h4 {
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--accent);
-    font-size: 11px;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-    font-weight: 500;
-  }
-  .footer kbd {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    background: var(--panel);
-    border: 1px solid var(--line);
-    padding: 1px 6px;
-    border-radius: 2px;
-    color: var(--ink);
-  }
-  @media (max-width: 760px) {
-    body { padding: 40px 20px 80px; }
-    .panel { padding: 24px 20px; }
-    .country-grid { grid-template-columns: 1fr; gap: 24px; }
-  }
+.declassified-stamp {
+  font-family: 'Special Elite', monospace;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  color: var(--alert);
+  border: 2.5px solid var(--alert);
+  padding: 8px 18px 6px;
+  transform: rotate(-7deg);
+  text-align: center;
+  line-height: 1.05;
+  font-weight: 700;
+  opacity: 0.86;
+  box-shadow: inset 0 0 0 1px var(--alert);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.declassified-stamp .date {
+  display: block; font-size: 10px; opacity: 0.85; margin-top: 3px;
+  letter-spacing: 0.2em;
+}
+
+.synopsis-row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 36px;
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--rule);
+}
+.synopsis-key {
+  font-size: 11px; letter-spacing: 0.25em; font-weight: 600;
+  color: var(--ink-faint); text-transform: uppercase;
+}
+.synopsis-key .v { color: var(--ink); display: block; font-weight: 500; margin-top: 4px; letter-spacing: 0.1em; }
+.synopsis-body {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 720px;
+}
+.synopsis-body em { color: var(--alert-deep); font-style: italic; }
+
+/* =========================================================
+   EXHIBIT NAV
+   ========================================================= */
+.exhibit-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 26px 0 0;
+  border: 1.5px solid var(--ink-soft);
+  background: rgba(216, 201, 160, 0.4);
+}
+.exhibit-nav a {
+  flex: 1 1 0;
+  padding: 14px 18px;
+  font-size: 11px; letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+  border-right: 1px solid var(--ink-soft);
+  transition: background 0.18s;
+  display: flex; flex-direction: column; gap: 4px;
+  position: relative;
+}
+.exhibit-nav a:last-child { border-right: 0; }
+.exhibit-nav a:hover { background: rgba(122, 31, 21, 0.12); }
+.exhibit-nav a .roman {
+  font-family: 'Special Elite', monospace;
+  font-size: 14px; color: var(--alert); letter-spacing: 0.05em;
+}
+.exhibit-nav a .name { font-weight: 600; color: var(--ink); }
+
+/* =========================================================
+   EXHIBIT SECTIONS
+   ========================================================= */
+.exhibit {
+  position: relative;
+  padding: 60px 0 50px;
+  border-bottom: 1px solid var(--rule);
+}
+.exhibit:last-of-type { border-bottom: 0; }
+.exhibit-label {
+  font-family: 'Special Elite', monospace;
+  font-size: 13px;
+  letter-spacing: 0.32em;
+  color: var(--alert);
+  border: 2px solid var(--alert);
+  padding: 6px 14px 4px;
+  display: inline-block;
+  margin-bottom: 18px;
+  transform: rotate(-1.2deg);
+  font-weight: 700;
+}
+.exhibit-roman {
+  font-family: 'Special Elite', monospace;
+  font-size: 13px; letter-spacing: 0.3em;
+  color: var(--ink-faint);
+  margin-bottom: 8px;
+}
+.exhibit h2 {
+  font-family: 'Special Elite', monospace;
+  font-size: clamp(28px, 3.5vw, 48px);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  font-weight: 400;
+  color: var(--ink);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.exhibit-deck {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 16px; line-height: 1.55;
+  color: var(--ink-soft); max-width: 760px;
+  margin-bottom: 36px;
+  padding-bottom: 24px;
+  border-bottom: 1px dashed var(--rule);
+}
+.exhibit-deck em { color: var(--alert-deep); font-style: italic; }
+
+/* margin sprocket marks */
+.exhibit::before {
+  content: '';
+  position: absolute;
+  top: 60px; bottom: 50px; left: -22px;
+  width: 8px;
+  background-image: linear-gradient(to bottom, var(--ink-faint) 0, var(--ink-faint) 50%, transparent 50%, transparent 100%);
+  background-size: 2px 14px;
+  opacity: 0.35;
+}
+
+/* =========================================================
+   CHART STYLES (shared)
+   ========================================================= */
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+.layer { transition: opacity 0.32s ease, filter 0.32s ease; cursor: pointer; }
+.chart-wrap.hovering .layer { opacity: 0.15; filter: saturate(0.4) brightness(0.95); }
+.chart-wrap.hovering .layer.active { opacity: 1; filter: none; }
+.chart-wrap.has-locked .layer:not(.locked) { opacity: 0.12 !important; filter: saturate(0.3) !important; }
+.chart-wrap .layer.locked { opacity: 1 !important; }
+
+.stream-label {
+  font-family: 'Special Elite', monospace;
+  font-weight: 400;
+  fill: var(--paper);
+  pointer-events: none;
+  letter-spacing: 0.08em;
+}
+.stream-label.dark { fill: var(--ink); }
+.event-line { stroke: var(--ink-soft); stroke-width: 1; stroke-dasharray: 3 4; opacity: 0.55; }
+.event-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  fill: var(--ink-soft);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.event-label .year { fill: var(--alert); font-weight: 700; }
+.era-band {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  fill: var(--ink-faint);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+.era-rule { stroke: var(--ink-faint); stroke-width: 1; opacity: 0.45; }
+.axis-line { stroke: var(--ink-soft); stroke-width: 1; opacity: 0.6; }
+.decade-tick, .decade-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+}
+.decade-tick { fill: var(--ink); font-size: 11px; cursor: pointer; transition: fill 0.18s; }
+.decade-tick:hover, .decade-tick.active { fill: var(--alert); }
+.decade-count { fill: var(--ink-faint); font-size: 9px; letter-spacing: 0.1em; }
+
+.playhead-line { stroke: var(--alert); stroke-width: 1.5; opacity: 0; pointer-events: none; }
+.playhead-label {
+  font-family: 'Special Elite', monospace;
+  fill: var(--alert);
+  font-size: 22px;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* =========================================================
+   CONTROL BAR + PANEL
+   ========================================================= */
+.control-bar {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 16px; justify-content: space-between;
+  margin: 30px 0 26px;
+  padding: 14px 20px;
+  background: rgba(184, 166, 121, 0.25);
+  border: 1px solid var(--ink-soft);
+  border-left: 3px solid var(--alert);
+}
+.control-label {
+  font-size: 10px; letter-spacing: 0.3em;
+  color: var(--ink-faint); text-transform: uppercase;
+  margin-right: 10px;
+}
+.decade-pills { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.pill {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; letter-spacing: 0.16em; font-weight: 500;
+  padding: 7px 13px;
+  background: transparent; border: 1px solid var(--ink-soft);
+  color: var(--ink); cursor: pointer;
+  transition: all 0.16s;
+  text-transform: uppercase;
+}
+.pill:hover { background: rgba(176, 48, 32, 0.12); color: var(--alert-deep); border-color: var(--alert); }
+.pill.active {
+  background: var(--alert); color: var(--paper);
+  border-color: var(--alert); font-weight: 700;
+}
+.clear-btn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--ink-faint); background: transparent;
+  border: 1px solid var(--ink-soft); padding: 7px 12px; cursor: pointer;
+  transition: all 0.16s;
+}
+.clear-btn:hover, .clear-btn.visible { color: var(--alert); border-color: var(--alert); }
+
+.panel {
+  background: rgba(184, 166, 121, 0.2);
+  border: 1px solid var(--ink-soft);
+  padding: 32px 36px 36px;
+  position: relative;
+  min-height: 320px;
+}
+.panel::before {
+  content: '/// DOSSIER FRAGMENT ///';
+  position: absolute; top: -8px; left: 24px;
+  background: var(--paper);
+  padding: 0 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; letter-spacing: 0.3em; color: var(--ink-faint);
+}
+.panel-header {
+  display: flex; align-items: baseline; gap: 22px;
+  margin-bottom: 6px; flex-wrap: wrap;
+}
+.panel-title {
+  font-family: 'Special Elite', monospace;
+  font-weight: 400;
+  font-size: clamp(28px, 4vw, 46px);
+  line-height: 1.05;
+  color: var(--ink);
+  text-transform: uppercase;
+}
+.panel-title .accent { color: var(--alert); }
+.panel-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; letter-spacing: 0.28em;
+  color: var(--ink-faint); text-transform: uppercase;
+}
+.panel-deck {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 15.5px; line-height: 1.5;
+  color: var(--ink-soft);
+  max-width: 800px;
+  margin: 14px 0 30px;
+  padding-bottom: 22px;
+  border-bottom: 1px dashed var(--rule);
+}
+.country-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 28px;
+}
+.country-card {
+  border-left: 3px solid var(--c-color, var(--alert));
+  padding: 0 0 0 16px;
+}
+.country-card .name-row {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px; margin-bottom: 12px;
+}
+.country-card .name {
+  font-family: 'Special Elite', monospace;
+  font-size: 16px;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.country-card .count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--c-color, var(--alert));
+  font-weight: 600;
+}
+.film-list { list-style: none; }
+.film-item {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 8px;
+  padding: 7px 0;
+  border-top: 1px dotted var(--rule);
+  font-size: 13px; line-height: 1.4;
+}
+.film-item:first-child { border-top: 0; }
+.film-item .year {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-faint);
+  padding-top: 2px;
+}
+.film-item .title { color: var(--ink); font-family: 'IBM Plex Serif', serif; font-weight: 600; }
+.film-item .villain { color: var(--ink-soft); font-style: italic; font-size: 12.5px; font-family: 'IBM Plex Serif', serif; }
+.empty-state {
+  color: var(--ink-faint); font-style: italic;
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 15px; padding: 30px 0; text-align: center;
+}
+.timeline-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 24px;
+}
+.timeline-decade-card {
+  border-top: 1px solid var(--ink-soft); padding-top: 14px;
+}
+.timeline-decade-card .decade-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--alert);
+  margin-bottom: 10px;
+}
+
+/* =========================================================
+   EXHIBIT B — CONSTELLATION
+   ========================================================= */
+.dot {
+  cursor: pointer;
+  transition: r 0.18s, filter 0.18s;
+}
+.dot:hover { filter: brightness(1.1); }
+.lane-line { stroke: var(--ink-soft); stroke-width: 0.6; opacity: 0.25; stroke-dasharray: 2 4; }
+.lane-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  fill: var(--ink);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.lane-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  fill: var(--ink-faint);
+  letter-spacing: 0.1em;
+}
+.constellation-tip {
+  position: absolute;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 12px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  max-width: 260px;
+  border-left: 3px solid var(--alert);
+  z-index: 20;
+}
+.constellation-tip .t-year { color: var(--alert); font-weight: 700; letter-spacing: 0.2em; font-size: 11px; }
+.constellation-tip .t-title { font-family: 'IBM Plex Serif', serif; font-size: 14px; font-weight: 600; margin: 4px 0 2px; }
+.constellation-tip .t-villain { font-family: 'IBM Plex Serif', serif; font-style: italic; opacity: 0.85; font-size: 12.5px; }
+.constellation-tip .t-country { font-size: 9.5px; letter-spacing: 0.25em; margin-top: 6px; opacity: 0.6; }
+
+/* =========================================================
+   EXHIBIT C — WORLD MAP
+   ========================================================= */
+.map-frame { position: relative; }
+.land { stroke: var(--paper); stroke-width: 0.4; transition: fill 0.6s ease; }
+.land.tagged { cursor: pointer; }
+.land.tagged:hover { stroke: var(--ink); stroke-width: 1; }
+.graticule { fill: none; stroke: var(--ink-soft); stroke-width: 0.3; opacity: 0.15; }
+.sphere { fill: rgba(45, 60, 80, 0.06); stroke: var(--ink-soft); stroke-width: 0.5; }
+.map-legend {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.18em;
+  fill: var(--ink); text-transform: uppercase;
+}
+.map-tip {
+  position: absolute;
+  background: var(--ink); color: var(--paper);
+  padding: 12px 16px; font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; line-height: 1.5;
+  pointer-events: none; opacity: 0;
+  transition: opacity 0.15s;
+  border-left: 3px solid var(--alert);
+  max-width: 280px; z-index: 20;
+}
+.map-tip .country { font-family: 'Special Elite', monospace; font-size: 15px; letter-spacing: 0.08em; color: var(--alert); margin-bottom: 4px; }
+.map-tip .films-list { margin-top: 6px; font-family: 'IBM Plex Serif', serif; font-size: 12px; font-style: italic; opacity: 0.85; }
+
+/* =========================================================
+   EXHIBIT D — HORIZON / SIGNAL CHART
+   ========================================================= */
+.signal-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  border-top: 1px solid var(--ink-soft);
+}
+.signal-row {
+  display: grid;
+  grid-template-columns: 200px 1fr 80px;
+  gap: 24px;
+  align-items: stretch;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+}
+.signal-row:nth-child(even) { background: rgba(168, 146, 96, 0.10); }
+.signal-name {
+  font-family: 'Special Elite', monospace;
+  font-size: 15px;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: flex; align-items: center; gap: 10px;
+}
+.signal-name .swatch {
+  width: 14px; height: 14px;
+  background: var(--c-color);
+  flex-shrink: 0;
+}
+.signal-chart { height: 56px; position: relative; }
+.signal-total {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--ink-faint);
+  text-align: right;
+  align-self: center;
+  letter-spacing: 0.1em;
+}
+.signal-total .num { color: var(--ink); font-weight: 600; font-size: 18px; }
+.signal-axis {
+  display: grid;
+  grid-template-columns: 200px 1fr 80px;
+  gap: 24px;
+  padding: 8px 18px 16px;
+  border-bottom: 2px solid var(--ink-soft);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.2em;
+  color: var(--ink-faint); text-transform: uppercase;
+}
+.signal-axis .decades {
+  display: flex; justify-content: space-between;
+}
+.signal-peak {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  background: var(--ink); color: var(--paper);
+  padding: 3px 8px; font-size: 9.5px; letter-spacing: 0.2em;
+  pointer-events: none; opacity: 0;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+.dossier-footer {
+  margin-top: 50px;
+  padding: 32px 0 50px;
+  border-top: 2px solid var(--ink-soft);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 36px;
+}
+.dossier-footer h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--alert);
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+.dossier-footer p, .dossier-footer div {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 13px; line-height: 1.55;
+  color: var(--ink-soft);
+}
+.dossier-footer kbd {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; padding: 1px 6px;
+  background: var(--paper-3); color: var(--ink);
+  border: 1px solid var(--ink-soft);
+}
+.end-mark {
+  text-align: center;
+  font-family: 'Special Elite', monospace;
+  font-size: 13px; letter-spacing: 0.4em;
+  color: var(--ink-faint);
+  padding: 30px 0 10px;
+  border-top: 1px dashed var(--rule);
+  margin-top: 30px;
+}
+
+@media (max-width: 760px) {
+  .wrap { padding: 0 20px; }
+  .synopsis-row { grid-template-columns: 1fr; }
+  .cover-hero { grid-template-columns: 1fr; }
+  .declassified-stamp { margin-top: 16px; align-self: flex-start; }
+  .signal-row, .signal-axis { grid-template-columns: 120px 1fr 60px; gap: 12px; padding: 10px 12px; }
+  .signal-name { font-size: 12px; }
+  .panel { padding: 22px 18px; }
+}
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="eyebrow">Hollywood &nbsp;&middot;&nbsp; 1940 – 2025 &nbsp;&middot;&nbsp; n ≈ 280 films</div>
-  <h1>The Changing Face<br/>of the <span class="accent underline">Villain</span></h1>
-  <p class="deck">
-    Every era picks its enemies. Eight decades of Hollywood's bad guys&mdash;
-    a moving mirror of who America has been afraid of.
+<div class="wrap">
+
+<!-- =========================================================
+     COVER
+     ========================================================= -->
+<header class="cover">
+  <div class="status-bar">
+    <div class="left">
+      <span class="alert">CLASSIFIED</span>
+      <span>//</span>
+      <span>EYES ONLY</span>
+      <span>//</span>
+      <span>INTERNAL DISTRIBUTION</span>
+    </div>
+    <div class="right">
+      <span class="case-no">FILE NO. HW–VIL–1940–2025</span>
+    </div>
+  </div>
+
+  <div class="cover-hero">
+    <h1 class="title">
+      The Changing<br/>
+      Face of the<br/>
+      <span class="alert-word">Villain.</span>
+    </h1>
+    <div class="declassified-stamp">
+      DECLASSIFIED
+      <span class="date">22 JUN 2026</span>
+    </div>
+  </div>
+
+  <div class="synopsis-row">
+    <div class="synopsis-key">
+      Subject<span class="v">Adversary rotation in<br/>Hollywood feature film</span>
+      <br/><br/>
+      Period<span class="v">1940 – 2025</span>
+      <br/><br/>
+      Sample<span class="v">~280 iconic features</span>
+    </div>
+    <div class="synopsis-body">
+      Every era picks its enemies. Eight decades of Hollywood's primary antagonists &mdash; tagged by country of origin &mdash; constitute a moving record of who America has been afraid of. <em>Nazis fade. Soviets crest twice, separated by an interregnum. The Middle East surges after September 2001. But the loudest, most persistent villain &mdash; from the 1970s on &mdash; has been America itself.</em>
+    </div>
+  </div>
+
+  <nav class="exhibit-nav">
+    <a href="#exhibit-d"><span class="roman">I</span><span class="name">Rankings</span></a>
+    <a href="#exhibit-a"><span class="roman">II</span><span class="name">Overview</span></a>
+    <a href="#exhibit-b"><span class="roman">III</span><span class="name">Every film</span></a>
+    <a href="#exhibit-c"><span class="roman">IV</span><span class="name">World map</span></a>
+  </nav>
+</header>
+
+<!-- =========================================================
+     EXHIBIT 1 — RANKINGS (was D)
+     ========================================================= -->
+<section class="exhibit" id="exhibit-d">
+  <div class="exhibit-roman">EXHIBIT 1 OF 4</div>
+  <div class="exhibit-label">RANKINGS</div>
+  <h2>How each country trended over time</h2>
+  <p class="exhibit-deck">
+    Each row is one origin. The little chart shows its film count across the decades, with the peak decade marked. Sorted by lifetime total &mdash; <em>top rows dominated; bottom rows are footnotes.</em>
+  </p>
+  <div class="signal-axis" id="signal-axis"></div>
+  <div class="signal-grid" id="signal-grid"></div>
+</section>
+
+<!-- =========================================================
+     EXHIBIT 2 — STREAMGRAPH (was A)
+     ========================================================= -->
+<section class="exhibit" id="exhibit-a">
+  <div class="exhibit-roman">EXHIBIT 2 OF 4</div>
+  <div class="exhibit-label">OVERVIEW</div>
+  <h2>All eleven origins, in one chart</h2>
+  <p class="exhibit-deck">
+    The same data, stacked into a single flowing chart. Each ribbon is one origin; its thickness in any given decade is the number of Hollywood villains we tagged to that origin. <em>Hover or click to drill into the films.</em>
   </p>
 
-  <!-- Streamgraph -->
-  <div class="chart-section">
-    <div class="chart-wrap" id="chart-wrap">
-      <svg id="chart" viewBox="0 0 1440 640" preserveAspectRatio="xMidYMid meet"></svg>
-    </div>
+  <div class="chart-wrap" id="chart-wrap">
+    <svg id="streamgraph" viewBox="0 0 1440 620" preserveAspectRatio="xMidYMid meet"></svg>
   </div>
 
-  <!-- Controls -->
   <div class="control-bar">
     <div class="decade-pills" id="decade-pills">
-      <span class="control-label">Decade</span>
+      <span class="control-label">DECADE</span>
     </div>
-    <button class="clear-btn" id="clear-btn">Reset selection &nbsp;·&nbsp; ESC</button>
+    <button class="clear-btn" id="clear-btn">Reset · ESC</button>
   </div>
 
-  <!-- Detail panel -->
   <div class="panel" id="panel"></div>
+</section>
 
-  <div class="footer">
-    <div>
-      <h4>How to use</h4>
-      Hover the streamgraph to see each decade's villains. Click a stream (or pick a decade pill) to lock the view. Click again, or press <kbd>ESC</kbd>, to release.
+<!-- =========================================================
+     EXHIBIT 3 — CONSTELLATION (was B)
+     ========================================================= -->
+<section class="exhibit" id="exhibit-b">
+  <div class="exhibit-roman">EXHIBIT 3 OF 4</div>
+  <div class="exhibit-label">EVERY FILM</div>
+  <h2>The whole sample, plotted</h2>
+  <p class="exhibit-deck">
+    Every Hollywood film in the dataset, one dot apiece. The lane is the origin we tagged it to; the horizontal position is its release year. <em>Hover any dot for the film and the villain.</em>
+  </p>
+  <div class="chart-wrap" id="constellation-wrap" style="position: relative;">
+    <svg id="constellation" viewBox="0 0 1440 560" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="constellation-tip" id="constellation-tip"></div>
+  </div>
+</section>
+
+<!-- =========================================================
+     EXHIBIT 4 — WORLD MAP (was C)
+     ========================================================= -->
+<section class="exhibit" id="exhibit-c">
+  <div class="exhibit-roman">EXHIBIT 4 OF 4</div>
+  <div class="exhibit-label">WORLD MAP</div>
+  <h2>Where the villains came from</h2>
+  <p class="exhibit-deck">
+    The same data, on the real world. Pick a decade &mdash; each country is shaded by how often it produced a Hollywood villain in that era. <em>Hover any shaded country for the films.</em>
+  </p>
+  <div class="control-bar" style="margin-bottom: 18px;">
+    <div class="decade-pills" id="map-decade-pills">
+      <span class="control-label">DECADE</span>
     </div>
-    <div>
-      <h4>Method</h4>
-      A hand-curated sample of well-known Hollywood films, 1940s&ndash;2020s. Each film's primary antagonist tagged by country of origin (or "Non-national" for aliens, AI, monsters, internal demons).
-    </div>
-    <div>
-      <h4>The story</h4>
-      Nazis fade. Soviets crest twice, separated by an interregnum. The Middle East surges after 9/11. But the loudest, most persistent villain&mdash;from the 1970s on&mdash;has been America itself.
-    </div>
-    <div>
-      <h4>Caveats</h4>
-      Iconic films, not exhaustive. Sample-driven. Some characters defy a single flag (Le Chiffre, Keyser Söze, Loki) and are placed where most viewers locate them.
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--ink-faint);text-transform:uppercase">
+      Hover any shaded country
     </div>
   </div>
+  <div class="map-frame" id="map-frame">
+    <svg id="worldmap" viewBox="0 0 1440 720" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="map-tip" id="map-tip"></div>
+  </div>
+</section>
+
+<footer class="dossier-footer">
+  <div>
+    <h4>Method</h4>
+    Hand-curated sample of well-known Hollywood films, 1940s through early 2025. Each film's primary antagonist tagged by country of origin (or <em>Non-national</em> for aliens, AI, monsters, internal demons).
+  </div>
+  <div>
+    <h4>How to read</h4>
+    <strong>Exhibit A:</strong> hover or click streams to expand a dossier fragment of the films behind each ribbon. <strong>B:</strong> hover dots for film details. <strong>C:</strong> swap decades to see the threat geography. <strong>D:</strong> read top-to-bottom as a hierarchy. <kbd>ESC</kbd> resets the streamgraph.
+  </div>
+  <div>
+    <h4>Caveats</h4>
+    Iconic films, not exhaustive. Some characters defy a single flag (Le Chiffre, Keyser Söze, Loki) and are placed where most viewers locate them. Regional categories (Middle East, Latin America) collapse multiple national origins.
+  </div>
+  <div>
+    <h4>Acknowledgements</h4>
+    Built with D3.js. World atlas via <code>world-atlas@2</code>. Typography: Special Elite, IBM Plex Mono, IBM Plex Serif.
+  </div>
+</footer>
+
+<div class="end-mark">/ /  END OF DOCUMENT  / /</div>
+
 </div>
 
 <script>
 // ============================================================
-// THE DATASET — every film, every villain
+// SHARED DATA — decades, categories, films, palette, mappings
 // ============================================================
 const decades = [
   { id: "1940s", year: 1945, label: "1940s", era: "World War II",       deck: "Hollywood mobilizes. Nazi officers and Imperial Japan dominate the screen; even noir villains feel like a wartime hangover." },
-  { id: "1950s", year: 1955, label: "1950s", era: "The Red scare",      deck: "The Soviet spy enters the bloodstream. Aliens stand in for Communists. Domestic anxiety simmers under the surface of small-town America." },
-  { id: "1960s", year: 1965, label: "1960s", era: "Cold War peak",      deck: "James Bond institutionalizes the Soviet villain. SPECTRE, Red China, and the Manchurian Candidate. Meanwhile, the call is coming from inside the house: Norman Bates, the Corleones-to-be." },
-  { id: "1970s", year: 1975, label: "1970s", era: "The Disillusion",    deck: "Watergate, Vietnam, the oil crisis. Hollywood turns its lens inward: corrupt cops, evil corporations, broken families. The villain is now us." },
-  { id: "1980s", year: 1985, label: "1980s", era: "Reagan's America",   deck: "Soviets return at maximum volume&mdash;Drago, Red Dawn, Rambo. Nazi-looters chase Indiana Jones. Yuppies and corporations metastasize. The screen has never been so divided between Russian and American villains." },
-  { id: "1990s", year: 1995, label: "1990s", era: "Unipolar moment",    deck: "The Wall falls. Briefly, the Russians are reduced to mobsters. Terrorists, Serbians, and rogue generals fill the gap. Domestic serial killers and Wall Street rise to dominate." },
-  { id: "2000s", year: 2005, label: "2000s", era: "War on Terror",      deck: "9/11 reshapes everything. The Middle East ribbon swells; Iraq, Saudi Arabia, Afghanistan, Persia and 300's Xerxes all appear. Behind it, billionaires, oil men, and Joker emerge as the new domestic id." },
-  { id: "2010s", year: 2015, label: "2010s", era: "The Return",         deck: "Russia comes back&mdash;John Wick, Atomic Blonde, MI: Ghost Protocol. North Korea has a brief moment. But the loudest villains are American: tech bros, white supremacists, the Get Out family." },
+  { id: "1950s", year: 1955, label: "1950s", era: "The Red Scare",      deck: "The Soviet spy enters the bloodstream. Aliens stand in for Communists. Domestic anxiety simmers under the surface of small-town America." },
+  { id: "1960s", year: 1965, label: "1960s", era: "Cold War peak",      deck: "Bond institutionalizes the Soviet villain. SPECTRE, Red China, and the Manchurian Candidate. Meanwhile the call is coming from inside the house: Norman Bates, the Corleones-to-be." },
+  { id: "1970s", year: 1975, label: "1970s", era: "Disillusion",        deck: "Watergate, Vietnam, the oil crisis. Hollywood turns its lens inward — corrupt cops, evil corporations, broken families. The villain is now us." },
+  { id: "1980s", year: 1985, label: "1980s", era: "Reagan's America",   deck: "Soviets return at maximum volume — Drago, Red Dawn, Rambo. Nazi-looters chase Indiana Jones. Yuppies and corporations metastasize." },
+  { id: "1990s", year: 1995, label: "1990s", era: "Unipolar moment",    deck: "The Wall falls. The Russians are briefly reduced to mobsters. Terrorists, Serbs, and rogue generals fill the gap. Domestic serial killers and Wall Street rise to dominate." },
+  { id: "2000s", year: 2005, label: "2000s", era: "War on Terror",      deck: "9/11 reshapes everything. The Middle East ribbon swells; Iraq, Saudi Arabia, Afghanistan, Persia, and 300's Xerxes all appear. Behind them, billionaires, oil men, and the Joker emerge as the new domestic id." },
+  { id: "2010s", year: 2015, label: "2010s", era: "The Return",         deck: "Russia comes back — John Wick, Atomic Blonde, MI: Ghost Protocol. North Korea has a brief moment. But the loudest villains are American: tech bros, white supremacists, the Get Out family." },
   { id: "2020s", year: 2023, label: "2020s", era: "Anxious present",    deck: "The villain is the algorithm, the billionaire, the autocrat, the bomb. Russia returns again. AI takes over for the alien. The line between bad guy and protagonist has nearly disappeared." }
 ];
+
+const keys = ["Germany", "Russia", "Middle East", "North Korea", "China", "Japan", "UK", "Latin America", "USA", "Vietnam", "Other"];
+
+const fullNames = {
+  "Germany":       "Germany",
+  "Russia":        "Russia / USSR",
+  "Middle East":   "Middle East",
+  "North Korea":   "North Korea",
+  "China":         "China",
+  "Japan":         "Japan",
+  "UK":            "United Kingdom",
+  "Latin America": "Latin America",
+  "USA":           "USA (Domestic)",
+  "Vietnam":       "Vietnam",
+  "Other":         "Non-national"
+};
+
+// Cold War Declassified palette — ink tones on manila
+const colors = {
+  "Germany":       "#5a1818",
+  "Russia":        "#b03020",
+  "Middle East":   "#7a5530",
+  "North Korea":   "#3a4a1a",
+  "China":         "#6b2a1a",
+  "Japan":         "#a05a30",
+  "UK":            "#1a3550",
+  "Latin America": "#3d6b3d",
+  "USA":           "#475670",
+  "Vietnam":       "#4a5430",
+  "Other":         "#5a2a5a"
+};
 
 // films[decade][country] = [[title, year, villain], ...]
 const films = {
@@ -509,21 +855,15 @@ const films = {
       ["Air Force", 1943, "Japanese Forces"],
       ["They Were Expendable", 1945, "Imperial Japanese Navy"]
     ],
-    UK: [
-      ["The Maltese Falcon", 1941, "Kasper Gutman"]
-    ],
-    "Latin America": [
-      ["The Treasure of the Sierra Madre", 1948, "Gold Hat"]
-    ],
+    UK: [["The Maltese Falcon", 1941, "Kasper Gutman"]],
+    "Latin America": [["The Treasure of the Sierra Madre", 1948, "Gold Hat"]],
     USA: [
       ["Double Indemnity", 1944, "Phyllis Dietrichson"],
       ["Key Largo", 1948, "Johnny Rocco"],
       ["The Big Sleep", 1946, "Eddie Mars"],
       ["Mildred Pierce", 1945, "Monte Beragon"]
     ],
-    Other: [
-      ["The Wolf Man", 1941, "The Werewolf"]
-    ]
+    Other: [["The Wolf Man", 1941, "The Werewolf"]]
   },
   "1950s": {
     Germany: [
@@ -537,19 +877,13 @@ const films = {
       ["My Son John", 1952, "John Jefferson"],
       ["Big Jim McLain", 1952, "Sturak"]
     ],
-    China: [
-      ["The Bridges at Toko-Ri", 1954, "Communist forces"]
-    ],
+    China: [["The Bridges at Toko-Ri", 1954, "Communist forces"]],
     Japan: [
       ["The Bridge on the River Kwai", 1957, "Col. Saito"],
       ["Three Came Home", 1950, "Col. Suga"]
     ],
-    UK: [
-      ["The Third Man", 1949, "Harry Lime"]
-    ],
-    "Latin America": [
-      ["Touch of Evil", 1958, "Grandi crime family"]
-    ],
+    UK: [["The Third Man", 1949, "Harry Lime"]],
+    "Latin America": [["Touch of Evil", 1958, "Grandi crime family"]],
     USA: [
       ["Strangers on a Train", 1951, "Bruno Antony"],
       ["Rear Window", 1954, "Lars Thorwald"],
@@ -576,17 +910,13 @@ const films = {
       ["The Spy Who Came in from the Cold", 1965, "Hans-Dieter Mundt"],
       ["Torn Curtain", 1966, "Gromek"]
     ],
-    "Middle East": [
-      ["Lawrence of Arabia", 1962, "Turkish Bey"]
-    ],
+    "Middle East": [["Lawrence of Arabia", 1962, "Turkish Bey"]],
     China: [
       ["Dr. No", 1962, "Julius No"],
       ["The Manchurian Candidate", 1962, "Yen Lo"],
-      ["You Only Live Twice", 1967, "SPECTRE (with Asian front)"]
+      ["You Only Live Twice", 1967, "SPECTRE (Asian front)"]
     ],
-    Japan: [
-      ["Bridge to the Sun", 1961, "Imperial militarism"]
-    ],
+    Japan: [["Bridge to the Sun", 1961, "Imperial militarism"]],
     UK: [
       ["The Servant", 1963, "Hugo Barrett"],
       ["The Italian Job", 1969, "Mr. Bridger"]
@@ -603,9 +933,7 @@ const films = {
       ["In Cold Blood", 1967, "Smith & Hickock"],
       ["Cape Fear", 1962, "Max Cady"]
     ],
-    Vietnam: [
-      ["The Green Berets", 1968, "Viet Cong"]
-    ],
+    Vietnam: [["The Green Berets", 1968, "Viet Cong"]],
     Other: [
       ["2001: A Space Odyssey", 1968, "HAL 9000"],
       ["The Birds", 1963, "The birds"],
@@ -625,15 +953,9 @@ const films = {
       ["Telefon", 1977, "Nikolai Dalchimsky"],
       ["Three Days of the Condor", 1975, "CIA / Cold War paranoia"]
     ],
-    "Middle East": [
-      ["Black Sunday", 1977, "Dahlia Iyad"]
-    ],
-    China: [
-      ["Enter the Dragon", 1973, "Han"]
-    ],
-    UK: [
-      ["A Clockwork Orange", 1971, "Alex DeLarge"]
-    ],
+    "Middle East": [["Black Sunday", 1977, "Dahlia Iyad"]],
+    China: [["Enter the Dragon", 1973, "Han"]],
+    UK: [["A Clockwork Orange", 1971, "Alex DeLarge"]],
     "Latin America": [
       ["The Godfather Part II", 1974, "Hyman Roth + Cuba"],
       ["Bring Me the Head of Alfredo Garcia", 1974, "El Jefe"]
@@ -688,9 +1010,7 @@ const films = {
       ["Back to the Future", 1985, "Libyan terrorists"],
       ["Iron Eagle", 1986, "Akir Nakesh"]
     ],
-    China: [
-      ["Big Trouble in Little China", 1986, "Lo Pan"]
-    ],
+    China: [["Big Trouble in Little China", 1986, "Lo Pan"]],
     Japan: [
       ["Black Rain", 1989, "Sato"],
       ["The Karate Kid Part II", 1986, "Chozen"]
@@ -749,12 +1069,8 @@ const films = {
       ["Three Kings", 1999, "Capt. Said"],
       ["Not Without My Daughter", 1991, "Moody"]
     ],
-    China: [
-      ["Red Corner", 1997, "Chinese state"]
-    ],
-    Japan: [
-      ["Rising Sun", 1993, "Eddie Sakamura"]
-    ],
+    China: [["Red Corner", 1997, "Chinese state"]],
+    Japan: [["Rising Sun", 1993, "Eddie Sakamura"]],
     UK: [
       ["Mission: Impossible", 1996, "Jim Phelps"],
       ["Patriot Games", 1992, "Sean Miller"],
@@ -814,12 +1130,8 @@ const films = {
       ["Black Hawk Down", 2001, "Aidid militia"],
       ["Rendition", 2007, "North African terror"]
     ],
-    "North Korea": [
-      ["Die Another Day", 2002, "Col. Tan-Sun Moon / Graves"]
-    ],
-    China: [
-      ["The Forbidden Kingdom", 2008, "The Jade Warlord"]
-    ],
+    "North Korea": [["Die Another Day", 2002, "Col. Tan-Sun Moon / Graves"]],
+    China: [["The Forbidden Kingdom", 2008, "The Jade Warlord"]],
     UK: [
       ["Layer Cake", 2004, "Eddie Temple"],
       ["Mission: Impossible 2", 2000, "Sean Ambrose"]
@@ -849,9 +1161,7 @@ const films = {
     ]
   },
   "2010s": {
-    Germany: [
-      ["The Monuments Men", 2014, "Nazi looters"]
-    ],
+    Germany: [["The Monuments Men", 2014, "Nazi looters"]],
     Russia: [
       ["Salt", 2010, "Orlov / Russian sleepers"],
       ["Jack Ryan: Shadow Recruit", 2014, "Viktor Cherevin"],
@@ -880,9 +1190,7 @@ const films = {
       ["Skyscraper", 2018, "Kores Botha"],
       ["The Great Wall", 2016, "The Tao Tei"]
     ],
-    Japan: [
-      ["The Wolverine", 2013, "Shingen / Silver Samurai"]
-    ],
+    Japan: [["The Wolverine", 2013, "Shingen / Silver Samurai"]],
     UK: [
       ["Skyfall", 2012, "Raoul Silva"],
       ["Mission: Impossible – Rogue Nation", 2015, "Solomon Lane"],
@@ -920,9 +1228,7 @@ const films = {
     ]
   },
   "2020s": {
-    Germany: [
-      ["Oppenheimer", 2023, "Hitler (off-screen)"]
-    ],
+    Germany: [["Oppenheimer", 2023, "Hitler (off-screen)"]],
     Russia: [
       ["No Time to Die", 2021, "Lyutsifer Safin"],
       ["Tenet", 2020, "Andrei Sator"],
@@ -931,18 +1237,9 @@ const films = {
       ["Extraction 2", 2023, "Zurab Radiani"],
       ["Heart of Stone", 2023, "Parker / The Charter"]
     ],
-    "Middle East": [
-      ["Top Gun: Maverick", 2022, "Unnamed rogue state"]
-    ],
-    China: [
-      ["Shang-Chi", 2021, "Wenwu / The Mandarin"]
-    ],
-    UK: [
-      ["Argylle", 2024, "The Division"]
-    ],
-    "Latin America": [
-      ["Hold the Dark", 2018, "(skipped)"]
-    ],
+    "Middle East": [["Top Gun: Maverick", 2022, "Unnamed rogue state"]],
+    China: [["Shang-Chi", 2021, "Wenwu / The Mandarin"]],
+    UK: [["Argylle", 2024, "The Division"]],
     USA: [
       ["Glass Onion", 2022, "Miles Bron"],
       ["Don't Look Up", 2021, "President Orlean"],
@@ -968,39 +1265,14 @@ const films = {
   }
 };
 
-// Strip stray entries (e.g. Latin America 2020s)
-delete films["2020s"]["Latin America"];
-
-const keys = ["Germany", "Russia", "Middle East", "North Korea", "China", "Japan", "UK", "Latin America", "USA", "Vietnam", "Other"];
-
-const fullNames = {
-  "Germany":       "Germany",
-  "Russia":        "Russia / USSR",
-  "Middle East":   "Middle East",
-  "North Korea":   "North Korea",
-  "China":         "China",
-  "Japan":         "Japan",
-  "UK":            "United Kingdom",
-  "Latin America": "Latin America",
-  "USA":           "USA (Domestic)",
-  "Vietnam":       "Vietnam",
-  "Other":         "Non-national"
-};
-
-const colorStops = {
-  "Germany":       ["#4a0c0c", "#a52a2a"],
-  "Russia":        ["#7a0d18", "#e63946"],
-  "Middle East":   ["#8a6510", "#e9c46a"],
-  "North Korea":   ["#1f2e15", "#5b7c3a"],
-  "China":         ["#5a160a", "#c8553d"],
-  "Japan":         ["#9c5520", "#f4a261"],
-  "UK":            ["#15314a", "#3e6691"],
-  "Latin America": ["#1e5a3c", "#52b788"],
-  "USA":           ["#27425b", "#7da4c8"],
-  "Vietnam":       ["#2c331a", "#7d8a47"],
-  "Other":         ["#3d165c", "#a064e0"]
-};
-const colors = Object.fromEntries(Object.entries(colorStops).map(([k, [, b]]) => [k, b]));
+// Aggregate decade × category counts
+const data = decades.map(d => {
+  const row = { decade: d.year, _id: d.id };
+  keys.forEach(k => {
+    row[k] = (films[d.id] && films[d.id][k]) ? films[d.id][k].length : 0;
+  });
+  return row;
+});
 
 const events = [
   { year: 1945, label: "End of WWII" },
@@ -1020,473 +1292,667 @@ const eraBands = [
   { x0: 2014, x1: 2025, label: "MULTIPOLAR RETURN" }
 ];
 
+// ISO 3-digit numeric → category (for world map)
+const isoToCategory = {
+  276: "Germany",
+  643: "Russia",
+  // Middle East family
+  364: "Middle East", 368: "Middle East", 682: "Middle East",
+  4:   "Middle East", 376: "Middle East", 760: "Middle East",
+  434: "Middle East", 586: "Middle East", 275: "Middle East",
+  // East Asia
+  408: "North Korea", 156: "China", 392: "Japan",
+  826: "UK",
+  // Latin America family
+  484: "Latin America", 170: "Latin America", 192: "Latin America",
+  76:  "Latin America", 222: "Latin America",
+  840: "USA",
+  704: "Vietnam"
+  // "Other" intentionally has no ISO
+};
+
+const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+const cssKey = k => k.replace(/\s+/g, "-");
+
 // ============================================================
-// Derive aggregate counts from films
+// EXHIBIT A · STREAMGRAPH
 // ============================================================
-const data = decades.map(d => {
-  const row = { decade: d.year, _id: d.id };
-  keys.forEach(k => {
-    row[k] = (films[d.id] && films[d.id][k]) ? films[d.id][k].length : 0;
+(function buildStreamgraph(){
+  const svg = d3.select("#streamgraph");
+  const W = 1440, H = 620;
+  const margin = { top: 60, right: 60, bottom: 70, left: 60 };
+  const innerW = W - margin.left - margin.right;
+  const innerH = H - margin.top - margin.bottom;
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const customOrder = ["Other", "Vietnam", "Latin America", "Japan", "China", "North Korea", "USA", "UK", "Middle East", "Germany", "Russia"];
+  const orderIdx = customOrder.map(k => keys.indexOf(k));
+
+  const stack = d3.stack().keys(keys).offset(d3.stackOffsetWiggle).order(() => orderIdx);
+  const series = stack(data);
+
+  const xScale = d3.scaleLinear().domain([1942, 2024]).range([20, innerW - 20]);
+  const yMin = d3.min(series, l => d3.min(l, d => d[0]));
+  const yMax = d3.max(series, l => d3.max(l, d => d[1]));
+  const yScale = d3.scaleLinear().domain([yMin, yMax]).range([innerH - 30, 30]);
+
+  const area = d3.area()
+    .x(d => xScale(d.data.decade))
+    .y0(d => yScale(d[0]))
+    .y1(d => yScale(d[1]))
+    .curve(d3.curveBasis);
+
+  // era bands top
+  const eraG = g.append("g");
+  eraBands.forEach(e => {
+    const x0 = xScale(Math.max(e.x0, 1942));
+    const x1 = xScale(Math.min(e.x1, 2024));
+    const cx = (x0 + x1) / 2;
+    const halfLabel = e.label.length * 3.6;
+    eraG.append("line").attr("class","era-rule")
+      .attr("x1", x0 + 6).attr("x2", cx - halfLabel)
+      .attr("y1", -34).attr("y2", -34);
+    eraG.append("line").attr("class","era-rule")
+      .attr("x1", cx + halfLabel).attr("x2", x1 - 6)
+      .attr("y1", -34).attr("y2", -34);
+    eraG.append("text").attr("class","era-band")
+      .attr("x", cx).attr("y", -30)
+      .attr("text-anchor","middle").text(e.label);
   });
-  return row;
-});
 
-// ============================================================
-// CHART
-// ============================================================
-const svg = d3.select("#chart");
-const W = 1440, H = 640;
-const margin = { top: 60, right: 60, bottom: 70, left: 60 };
-const innerW = W - margin.left - margin.right;
-const innerH = H - margin.top - margin.bottom;
+  // event lines
+  const eventG = g.append("g");
+  events.forEach(ev => {
+    if (ev.year < 1942 || ev.year > 2024) return;
+    const x = xScale(ev.year);
+    eventG.append("line").attr("class","event-line")
+      .attr("x1", x).attr("x2", x).attr("y1", -10).attr("y2", innerH);
+    const t = eventG.append("text").attr("class","event-label")
+      .attr("x", x).attr("y", -14).attr("text-anchor","middle");
+    t.append("tspan").attr("class","year").text(ev.year);
+    t.append("tspan").attr("dx", 6).text(ev.label);
+  });
 
-// SVG defs: gradients per country, glow filter
-const defs = svg.append("defs");
-
-// vertical gradient for each country (top: bright, bottom: dark)
-Object.entries(colorStops).forEach(([k, [dark, bright]]) => {
-  const id = `grad-${k.replace(/\s+/g, "-")}`;
-  const grad = defs.append("linearGradient")
-    .attr("id", id)
-    .attr("x1", "0%").attr("y1", "0%")
-    .attr("x2", "0%").attr("y2", "100%");
-  grad.append("stop").attr("offset", "0%").attr("stop-color", bright);
-  grad.append("stop").attr("offset", "60%").attr("stop-color", d3.interpolateRgb(bright, dark)(0.4));
-  grad.append("stop").attr("offset", "100%").attr("stop-color", dark);
-});
-
-// soft glow filter
-const glow = defs.append("filter")
-  .attr("id", "glow")
-  .attr("x", "-20%").attr("y", "-20%")
-  .attr("width", "140%").attr("height", "140%");
-glow.append("feGaussianBlur").attr("stdDeviation", "4").attr("result", "blur");
-const merge = glow.append("feMerge");
-merge.append("feMergeNode").attr("in", "blur");
-merge.append("feMergeNode").attr("in", "SourceGraphic");
-
-// film grain texture for the streams
-const grain = defs.append("filter").attr("id", "grain");
-grain.append("feTurbulence")
-  .attr("type", "fractalNoise")
-  .attr("baseFrequency", "0.9")
-  .attr("numOctaves", "2")
-  .attr("result", "noise");
-grain.append("feColorMatrix")
-  .attr("in", "noise")
-  .attr("values", "0 0 0 0 0   0 0 0 0 0   0 0 0 0 0   0 0 0 0.18 0")
-  .attr("result", "noiseAlpha");
-grain.append("feComposite")
-  .attr("in", "noiseAlpha")
-  .attr("in2", "SourceGraphic")
-  .attr("operator", "in")
-  .attr("result", "noiseInside");
-const grainMerge = grain.append("feMerge");
-grainMerge.append("feMergeNode").attr("in", "SourceGraphic");
-grainMerge.append("feMergeNode").attr("in", "noiseInside");
-
-const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-
-// ============================================================
-// SCALES + STACK
-// ============================================================
-const customOrder = ["Other", "Vietnam", "Latin America", "Japan", "China", "North Korea", "USA", "UK", "Middle East", "Germany", "Russia"];
-const orderIdx = customOrder.map(k => keys.indexOf(k));
-
-const stack = d3.stack()
-  .keys(keys)
-  .offset(d3.stackOffsetWiggle)
-  .order(() => orderIdx);
-
-const series = stack(data);
-
-const xScale = d3.scaleLinear()
-  .domain([1942, 2024])
-  .range([20, innerW - 20]);
-
-const yMin = d3.min(series, l => d3.min(l, d => d[0]));
-const yMax = d3.max(series, l => d3.max(l, d => d[1]));
-const yScale = d3.scaleLinear()
-  .domain([yMin, yMax])
-  .range([innerH - 30, 30]);
-
-const area = d3.area()
-  .x(d => xScale(d.data.decade))
-  .y0(d => yScale(d[0]))
-  .y1(d => yScale(d[1]))
-  .curve(d3.curveBasis);
-
-// ============================================================
-// ERA BANDS along top
-// ============================================================
-const eraG = g.append("g").attr("class", "eras");
-eraBands.forEach(e => {
-  const x0 = xScale(Math.max(e.x0, 1942));
-  const x1 = xScale(Math.min(e.x1, 2024));
-  const cx = (x0 + x1) / 2;
-  eraG.append("line")
-    .attr("class", "era-rule")
-    .attr("x1", x0 + 4).attr("x2", cx - e.label.length * 4)
-    .attr("y1", -34).attr("y2", -34);
-  eraG.append("line")
-    .attr("class", "era-rule")
-    .attr("x1", cx + e.label.length * 4).attr("x2", x1 - 4)
-    .attr("y1", -34).attr("y2", -34);
-  eraG.append("text")
-    .attr("class", "era-band")
-    .attr("x", cx).attr("y", -30)
-    .attr("text-anchor", "middle")
-    .text(e.label);
-});
-
-// ============================================================
-// EVENT ANNOTATIONS
-// ============================================================
-const eventG = g.append("g").attr("class", "events");
-events.forEach(ev => {
-  if (ev.year < 1942 || ev.year > 2024) return;
-  const x = xScale(ev.year);
-  eventG.append("line")
-    .attr("class", "event-line")
-    .attr("x1", x).attr("x2", x)
-    .attr("y1", -10).attr("y2", innerH);
-  const t = eventG.append("text")
-    .attr("class", "event-label")
-    .attr("x", x).attr("y", -14)
-    .attr("text-anchor", "middle");
-  t.append("tspan").attr("class", "year").text(ev.year);
-  t.append("tspan").attr("dx", 6).text(ev.label);
-});
-
-// ============================================================
-// STREAMS
-// ============================================================
-const layers = g.selectAll(".layer")
-  .data(series)
-  .enter().append("path")
+  // streams
+  const layers = g.selectAll(".layer").data(series).enter().append("path")
     .attr("class", d => `layer layer-${cssKey(d.key)}`)
     .attr("data-key", d => d.key)
     .attr("d", area)
-    .style("fill", d => `url(#grad-${cssKey(d.key)})`)
+    .style("fill", d => colors[d.key])
     .style("opacity", 0);
 
-layers.transition()
-  .duration(900)
-  .delay((d, i) => i * 50)
-  .style("opacity", 1);
+  layers.transition().duration(900).delay((d,i) => i * 50).style("opacity", 1);
 
-// stream labels
-const lightFills = new Set(["Middle East", "Japan"]);
-series.forEach(layer => {
-  let bestI = 0, bestW = 0;
-  layer.forEach((pt, i) => {
-    const w = pt[1] - pt[0];
-    if (w > bestW) { bestW = w; bestI = i; }
+  // stream labels
+  const lightFills = new Set(["Middle East", "Japan", "Latin America"]);
+  series.forEach(layer => {
+    let bestI = 0, bestW = 0;
+    layer.forEach((pt, i) => { const w = pt[1] - pt[0]; if (w > bestW) { bestW = w; bestI = i; } });
+    if (bestW < 1.6) return;
+    const pt = layer[bestI];
+    const cx = xScale(pt.data.decade);
+    const cy = yScale((pt[0] + pt[1]) / 2);
+    const fontSize = Math.max(11, Math.min(20, bestW * 2.0));
+    let label = layer.key.toUpperCase();
+    if (layer.key === "Russia") label = "RUSSIA / USSR";
+    if (layer.key === "USA") label = "USA · DOMESTIC";
+    if (layer.key === "Other") label = "NON-NATIONAL";
+    g.append("text")
+      .attr("class","stream-label" + (lightFills.has(layer.key) ? " dark" : ""))
+      .attr("x", cx).attr("y", cy)
+      .attr("text-anchor","middle").attr("dominant-baseline","middle")
+      .style("font-size", fontSize + "px")
+      .style("opacity", 0)
+      .text(label)
+      .transition().delay(1100).duration(600).style("opacity", 1);
   });
-  if (bestW < 1.6) return;
-  const pt = layer[bestI];
-  const cx = xScale(pt.data.decade);
-  const cy = yScale((pt[0] + pt[1]) / 2);
-  const fontSize = Math.max(11, Math.min(22, bestW * 2.2));
-  let label = layer.key.toUpperCase();
-  if (layer.key === "Russia") label = "RUSSIA / USSR";
-  if (layer.key === "USA") label = "USA (DOMESTIC)";
-  if (layer.key === "Other") label = "NON-NATIONAL";
-  g.append("text")
-    .attr("class", "stream-label" + (lightFills.has(layer.key) ? " dark" : ""))
-    .attr("x", cx).attr("y", cy)
-    .attr("text-anchor", "middle")
-    .attr("dominant-baseline", "middle")
-    .style("font-size", fontSize + "px")
-    .style("opacity", 0)
-    .text(label)
-    .transition().delay(1100).duration(600)
-    .style("opacity", 1);
-});
 
-// ============================================================
-// DECADE AXIS
-// ============================================================
-g.append("line")
-  .attr("class", "axis-line")
-  .attr("x1", 0).attr("x2", innerW)
-  .attr("y1", innerH + 14).attr("y2", innerH + 14);
-
-const decadeG = g.selectAll(".decade-group")
-  .data(decades).enter().append("g")
-    .attr("class", "decade-group")
+  // axis + decade ticks
+  g.append("line").attr("class","axis-line")
+    .attr("x1", 0).attr("x2", innerW).attr("y1", innerH + 14).attr("y2", innerH + 14);
+  const decadeG = g.selectAll(".decade-group").data(decades).enter().append("g")
     .attr("transform", d => `translate(${xScale(d.year)},0)`);
+  decadeG.append("line").attr("class","axis-line")
+    .attr("y1", innerH + 12).attr("y2", innerH + 18);
+  decadeG.append("text").attr("class","decade-tick")
+    .attr("data-decade", d => d.id)
+    .attr("y", innerH + 34).attr("text-anchor","middle")
+    .text(d => d.label)
+    .on("click", (e,d) => setSelection({ decade: d.id, country: null }));
+  decadeG.append("text").attr("class","decade-count")
+    .attr("y", innerH + 50).attr("text-anchor","middle")
+    .text(d => "n=" + d3.sum(keys, k => data.find(r => r._id === d.id)[k]));
 
-decadeG.append("line")
-  .attr("class", "axis-line")
-  .attr("y1", innerH + 12).attr("y2", innerH + 18);
+  // playhead
+  const playheadG = g.append("g").style("pointer-events","none");
+  const playheadLine = playheadG.append("line").attr("class","playhead-line")
+    .attr("y1", -10).attr("y2", innerH + 18);
+  const playheadLabel = playheadG.append("text").attr("class","playhead-label")
+    .attr("text-anchor","middle").attr("y", -42);
 
-decadeG.append("text")
-  .attr("class", "decade-tick")
-  .attr("data-decade", d => d.id)
-  .attr("y", innerH + 34)
-  .attr("text-anchor", "middle")
-  .text(d => d.label)
-  .on("click", (e, d) => setSelection({ decade: d.id, country: null }));
-
-decadeG.append("text")
-  .attr("class", "decade-count")
-  .attr("y", innerH + 50)
-  .attr("text-anchor", "middle")
-  .text(d => "n=" + d3.sum(keys, k => data.find(r => r._id === d.id)[k]));
-
-// ============================================================
-// PLAYHEAD
-// ============================================================
-const playheadG = g.append("g").attr("class", "playhead-g").style("pointer-events", "none");
-const playheadLine = playheadG.append("line")
-  .attr("class", "playhead-line")
-  .attr("y1", -10).attr("y2", innerH + 18);
-const playheadLabel = playheadG.append("text")
-  .attr("class", "playhead-label")
-  .attr("text-anchor", "middle")
-  .attr("y", -42);
-
-function nearestDecadeForX(mx) {
-  let nearest = decades[0], best = Infinity;
-  decades.forEach(d => {
-    const dist = Math.abs(xScale(d.year) - mx);
-    if (dist < best) { best = dist; nearest = d; }
-  });
-  return nearest;
-}
-
-// ============================================================
-// SELECTION STATE
-// ============================================================
-let locked = { decade: null, country: null };
-let hoverDecade = null;
-const chartWrap = document.getElementById("chart-wrap");
-
-function setHover(decadeId) {
-  hoverDecade = decadeId;
-  if (decadeId) {
-    const dec = decades.find(d => d.id === decadeId);
-    const x = xScale(dec.year);
-    playheadLine.attr("x1", x).attr("x2", x).style("opacity", 0.85);
-    playheadLabel.attr("x", x).text(dec.label).style("opacity", 1);
-    d3.selectAll(".decade-tick").classed("active", d => d.id === decadeId);
-  } else {
-    playheadLine.style("opacity", 0);
-    playheadLabel.style("opacity", 0);
-    d3.selectAll(".decade-tick").classed("active", false);
+  function nearestDecadeForX(mx){
+    let nearest = decades[0], best = Infinity;
+    decades.forEach(d => { const dist = Math.abs(xScale(d.year) - mx); if (dist < best) { best = dist; nearest = d; } });
+    return nearest;
   }
-  renderPanel();
-}
 
-function setSelection({ decade, country }) {
-  if (locked.decade === decade && locked.country === country) {
-    // click again to unlock
-    locked = { decade: null, country: null };
-  } else {
-    locked = { decade, country };
-  }
-  applyLockedHighlight();
-  hoverDecade = locked.decade;
-  if (locked.decade) {
-    const dec = decades.find(d => d.id === locked.decade);
-    const x = xScale(dec.year);
-    playheadLine.attr("x1", x).attr("x2", x).style("opacity", 1);
-    playheadLabel.attr("x", x).text(dec.label).style("opacity", 1);
-    d3.selectAll(".decade-tick").classed("active", d => d.id === locked.decade);
-  } else {
-    setHover(null);
-  }
-  document.getElementById("clear-btn").classList.toggle("visible", !!(locked.decade || locked.country));
-  d3.selectAll(".pill").classed("active", function() {
-    return this.dataset.decade === locked.decade;
-  });
-  renderPanel();
-}
+  // selection state + panel
+  let locked = { decade: null, country: null };
+  let hoverDecade = null;
+  const chartWrap = document.getElementById("chart-wrap");
+  const panelEl = document.getElementById("panel");
 
-function applyLockedHighlight() {
-  if (locked.country) {
-    chartWrap.classList.add("has-locked");
-    d3.selectAll(".layer").classed("locked", function() {
-      return this.dataset.key === locked.country;
+  function setHover(decadeId){
+    hoverDecade = decadeId;
+    if (decadeId){
+      const dec = decades.find(d => d.id === decadeId);
+      const x = xScale(dec.year);
+      playheadLine.attr("x1", x).attr("x2", x).style("opacity", 0.85);
+      playheadLabel.attr("x", x).text(dec.label).style("opacity", 1);
+      d3.selectAll(".decade-tick").classed("active", d => d.id === decadeId);
+    } else {
+      playheadLine.style("opacity", 0);
+      playheadLabel.style("opacity", 0);
+      d3.selectAll(".decade-tick").classed("active", false);
+    }
+    renderPanel();
+  }
+  window.setStreamSelection = setSelection; // expose for external pills
+  function setSelection({ decade, country }){
+    if (locked.decade === decade && locked.country === country){
+      locked = { decade: null, country: null };
+    } else {
+      locked = { decade, country };
+    }
+    applyLockedHighlight();
+    hoverDecade = locked.decade;
+    if (locked.decade){
+      const dec = decades.find(d => d.id === locked.decade);
+      const x = xScale(dec.year);
+      playheadLine.attr("x1", x).attr("x2", x).style("opacity", 1);
+      playheadLabel.attr("x", x).text(dec.label).style("opacity", 1);
+      d3.selectAll(".decade-tick").classed("active", d => d.id === locked.decade);
+    } else { setHover(null); }
+    document.getElementById("clear-btn").classList.toggle("visible", !!(locked.decade || locked.country));
+    d3.selectAll("#decade-pills .pill").classed("active", function(){
+      return this.dataset.decade === locked.decade;
     });
-  } else {
-    chartWrap.classList.remove("has-locked");
-    d3.selectAll(".layer").classed("locked", false);
+    renderPanel();
   }
-}
+  function applyLockedHighlight(){
+    if (locked.country){
+      chartWrap.classList.add("has-locked");
+      d3.selectAll(".layer").classed("locked", function(){ return this.dataset.key === locked.country; });
+    } else {
+      chartWrap.classList.remove("has-locked");
+      d3.selectAll(".layer").classed("locked", false);
+    }
+  }
+  layers
+    .on("mousemove", function(event,d){
+      if (locked.country) return;
+      const [mx] = d3.pointer(event, g.node());
+      setHover(nearestDecadeForX(mx).id);
+      chartWrap.classList.add("hovering");
+      d3.selectAll(".layer").classed("active", false);
+      d3.select(this).classed("active", true);
+    })
+    .on("mouseleave", function(){
+      if (locked.country) return;
+      chartWrap.classList.remove("hovering");
+      d3.selectAll(".layer").classed("active", false);
+      if (!locked.decade) setHover(null);
+    })
+    .on("click", function(event,d){
+      event.stopPropagation();
+      const [mx] = d3.pointer(event, g.node());
+      setSelection({ decade: nearestDecadeForX(mx).id, country: d.key });
+    });
 
-// stream interactions — also drive the playhead
-layers
-  .on("mousemove", function(event, d) {
-    if (locked.country) return;
-    const [mx] = d3.pointer(event, g.node());
-    setHover(nearestDecadeForX(mx).id);
-    chartWrap.classList.add("hovering");
-    d3.selectAll(".layer").classed("active", false);
-    d3.select(this).classed("active", true);
-  })
-  .on("mouseleave", function() {
-    if (locked.country) return;
-    chartWrap.classList.remove("hovering");
-    d3.selectAll(".layer").classed("active", false);
-    if (!locked.decade) setHover(null);
-  })
-  .on("click", function(event, d) {
-    event.stopPropagation();
-    const [mx] = d3.pointer(event, g.node());
-    const decId = nearestDecadeForX(mx).id;
-    setSelection({ decade: decId, country: d.key });
+  // decade pills
+  const pillBar = d3.select("#decade-pills");
+  decades.forEach(d => {
+    pillBar.append("button").attr("class","pill")
+      .attr("data-decade", d.id).text(d.label)
+      .on("click", () => setSelection({ decade: d.id, country: locked.country }));
   });
+  document.getElementById("clear-btn").addEventListener("click", () => setSelection({ decade: null, country: null }));
+  document.addEventListener("keydown", e => { if (e.key === "Escape") setSelection({ decade: null, country: null }); });
 
-// ============================================================
-// CONTROLS — decade pills
-// ============================================================
-const pillBar = d3.select("#decade-pills");
-decades.forEach(d => {
-  pillBar.append("button")
-    .attr("class", "pill")
-    .attr("data-decade", d.id)
-    .text(d.label)
-    .on("click", () => setSelection({ decade: d.id, country: locked.country }));
-});
-
-document.getElementById("clear-btn").addEventListener("click", () => {
-  setSelection({ decade: null, country: null });
-});
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") setSelection({ decade: null, country: null });
-});
-
-// ============================================================
-// DETAIL PANEL RENDER
-// ============================================================
-const panelEl = document.getElementById("panel");
-
-function renderPanel() {
-  const decId = locked.decade || hoverDecade;
-  const countryKey = locked.country;
-
-  if (!decId && !countryKey) {
+  // ============================================================
+  // PANEL RENDER
+  // ============================================================
+  function renderPanel(){
+    const decId = locked.decade || hoverDecade;
+    const countryKey = locked.country;
+    if (!decId && !countryKey){ renderOverview(); return; }
+    if (countryKey && decId) renderCell(decId, countryKey);
+    else if (countryKey) renderCountry(countryKey);
+    else renderDecade(decId);
+  }
+  function renderOverview(){
+    const summaries = keys.map(k => {
+      const all = [];
+      decades.forEach(d => (films[d.id]?.[k] || []).forEach(f => all.push(f)));
+      all.sort((a,b) => a[1] - b[1]);
+      return { key: k, total: all.length, all };
+    }).filter(s => s.total > 0).sort((a,b) => b.total - a.total);
+    const totalFilms = d3.sum(summaries, s => s.total);
     panelEl.innerHTML = `
       <div class="panel-header">
-        <div class="panel-title">The <span class="accent">dataset</span></div>
-        <div class="panel-sub">~280 films · 11 origins · 9 decades</div>
+        <div class="panel-title">The full <span class="accent">catalog</span></div>
+        <div class="panel-sub">${totalFilms} FILMS · ${summaries.length} ORIGINS · 1940s–2020s</div>
       </div>
-      <div class="panel-deck">
-        Hover or click the streamgraph above to inspect any decade or country.
-        Each ribbon's thickness is the number of iconic films from that origin in our sample.
+      <div class="panel-deck">Every origin we tracked, sorted by total film count. Click an origin to see all its films across decades &mdash; or hover the streamgraph above to drill into a specific decade.</div>
+      <div class="country-grid">
+        ${summaries.map(s => overviewCardHTML(s.key, s.all)).join("")}
+      </div>`;
+    panelEl.querySelectorAll(".country-card").forEach(card => {
+      card.style.cursor = "pointer";
+      card.addEventListener("click", () => setSelection({ decade: null, country: card.dataset.country }));
+    });
+  }
+  function overviewCardHTML(k, all){
+    const n = all.length;
+    let samples;
+    if (n <= 4) samples = all;
+    else samples = [all[0], all[Math.floor(n/3)], all[Math.floor(2*n/3)], all[n-1]];
+    return `<div class="country-card" style="--c-color:${colors[k]}" data-country="${k}">
+      <div class="name-row"><div class="name">${fullNames[k]}</div><div class="count">${n}</div></div>
+      <ul class="film-list">${samples.map(filmItemHTML).join("")}</ul>
+    </div>`;
+  }
+  function renderDecade(decId){
+    const dec = decades.find(d => d.id === decId);
+    const cellMap = films[decId] || {};
+    const total = d3.sum(keys, k => (cellMap[k] || []).length);
+    const presentKeys = keys.filter(k => (cellMap[k] || []).length > 0);
+    presentKeys.sort((a,b) => cellMap[b].length - cellMap[a].length);
+    panelEl.innerHTML = `
+      <div class="panel-header">
+        <div class="panel-title">${dec.label}<span class="accent"> · </span>${dec.era}</div>
+        <div class="panel-sub">${total} FILMS · ${presentKeys.length} ORIGINS</div>
       </div>
-      <div class="empty-state">→ &nbsp; Move your cursor across the chart to begin.</div>`;
-    return;
+      <div class="panel-deck">${dec.deck}</div>
+      <div class="country-grid">${presentKeys.map(k => countryCardHTML(k, cellMap[k])).join("")}</div>`;
+    panelEl.querySelectorAll(".country-card").forEach(card => {
+      card.style.cursor = "pointer";
+      card.addEventListener("click", () => setSelection({ decade: decId, country: card.dataset.country }));
+    });
   }
-
-  if (countryKey && decId) {
-    // country in a specific decade
-    renderCellPanel(decId, countryKey);
-  } else if (countryKey) {
-    renderCountryPanel(countryKey);
-  } else {
-    renderDecadePanel(decId);
+  function renderCell(decId, k){
+    const dec = decades.find(d => d.id === decId);
+    const list = (films[decId] || {})[k] || [];
+    panelEl.innerHTML = `
+      <div class="panel-header">
+        <div class="panel-title">${fullNames[k]}<span class="accent"> · </span>${dec.label}</div>
+        <div class="panel-sub">${list.length} FILMS · ${dec.era}</div>
+      </div>
+      <div class="panel-deck">${dec.deck}</div>
+      <div class="country-grid">${list.length ? countryCardHTML(k, list) : `<div class="empty-state">No films sampled in this cell.</div>`}</div>`;
   }
-}
-
-function renderDecadePanel(decId) {
-  const dec = decades.find(d => d.id === decId);
-  const cellMap = films[decId] || {};
-  const total = d3.sum(keys, k => (cellMap[k] || []).length);
-  const presentKeys = keys.filter(k => (cellMap[k] || []).length > 0);
-  // sort by descending count
-  presentKeys.sort((a, b) => (cellMap[b].length - cellMap[a].length));
-
-  panelEl.innerHTML = `
-    <div class="panel-header">
-      <div class="panel-title">${dec.label}<span class="accent"> · </span>${dec.era}</div>
-      <div class="panel-sub">${total} films · ${presentKeys.length} origins</div>
-    </div>
-    <div class="panel-deck">${dec.deck}</div>
-    <div class="country-grid">
-      ${presentKeys.map(k => countryCardHTML(k, cellMap[k])).join("")}
-    </div>`;
-  attachCountryCardClicks(decId);
-}
-
-function renderCellPanel(decId, k) {
-  const dec = decades.find(d => d.id === decId);
-  const cellMap = films[decId] || {};
-  const list = cellMap[k] || [];
-  panelEl.innerHTML = `
-    <div class="panel-header">
-      <div class="panel-title">${fullNames[k]}<span class="accent"> · </span>${dec.label}</div>
-      <div class="panel-sub">${list.length} films · ${dec.era}</div>
-    </div>
-    <div class="panel-deck">${dec.deck}</div>
-    <div class="country-grid">
-      ${list.length ? countryCardHTML(k, list) : `<div class="empty-state">No films sampled in this cell.</div>`}
-    </div>`;
-}
-
-function renderCountryPanel(k) {
-  const totalCount = d3.sum(decades, d => (films[d.id]?.[k] || []).length);
-  panelEl.innerHTML = `
-    <div class="panel-header">
-      <div class="panel-title">${fullNames[k]}<span class="accent"> · </span>across decades</div>
-      <div class="panel-sub">${totalCount} films · 1940s–2020s</div>
-    </div>
-    <div class="panel-deck">Every sampled Hollywood film where the primary antagonist's origin reads as ${fullNames[k]}.</div>
-    <div class="timeline-grid">
-      ${decades.map(d => {
-        const list = films[d.id]?.[k] || [];
-        if (!list.length) return "";
-        return `
-          <div class="timeline-decade-card">
+  function renderCountry(k){
+    const totalCount = d3.sum(decades, d => (films[d.id]?.[k] || []).length);
+    panelEl.innerHTML = `
+      <div class="panel-header">
+        <div class="panel-title">${fullNames[k]}<span class="accent"> · </span>ACROSS DECADES</div>
+        <div class="panel-sub">${totalCount} FILMS · 1940s–2020s</div>
+      </div>
+      <div class="panel-deck">Every sampled Hollywood film whose primary antagonist reads as ${fullNames[k]}.</div>
+      <div class="timeline-grid">
+        ${decades.map(d => {
+          const list = films[d.id]?.[k] || [];
+          if (!list.length) return "";
+          return `<div class="timeline-decade-card">
             <div class="decade-name">${d.label}<span style="opacity:0.5"> · ${list.length}</span></div>
-            <ul class="film-list">
-              ${list.map(f => filmItemHTML(f)).join("")}
-            </ul>
+            <ul class="film-list">${list.map(filmItemHTML).join("")}</ul>
           </div>`;
-      }).join("")}
+        }).join("")}
+      </div>`;
+  }
+  function countryCardHTML(k, list){
+    return `<div class="country-card" style="--c-color:${colors[k]}" data-country="${k}">
+      <div class="name-row"><div class="name">${fullNames[k]}</div><div class="count">${list.length}</div></div>
+      <ul class="film-list">${list.map(filmItemHTML).join("")}</ul>
     </div>`;
-}
+  }
+  function filmItemHTML(f){
+    const [title, year, villain] = f;
+    return `<li class="film-item"><div class="year">${year}</div><div class="meta"><div class="title">${escapeHtml(title)}</div><div class="villain">${escapeHtml(villain)}</div></div></li>`;
+  }
+  renderPanel();
+})();
 
-function countryCardHTML(k, list) {
-  return `
-    <div class="country-card" style="--c-color:${colors[k]}" data-country="${k}">
-      <div class="name-row">
-        <div class="name">${fullNames[k]}</div>
-        <div class="count">${list.length}</div>
-      </div>
-      <ul class="film-list">
-        ${list.map(f => filmItemHTML(f)).join("")}
-      </ul>
-    </div>`;
-}
-function filmItemHTML(f) {
-  const [title, year, villain] = f;
-  return `
-    <li class="film-item">
-      <div class="year">${year}</div>
-      <div class="meta">
-        <div class="title">${escapeHtml(title)}</div>
-        <div class="villain">${escapeHtml(villain)}</div>
-      </div>
-    </li>`;
-}
-function attachCountryCardClicks(decId) {
-  panelEl.querySelectorAll(".country-card").forEach(card => {
-    card.style.cursor = "pointer";
-    card.addEventListener("click", () => {
-      setSelection({ decade: decId, country: card.dataset.country });
+// ============================================================
+// EXHIBIT B · CONSTELLATION (one dot per film)
+// ============================================================
+(function buildConstellation(){
+  const svg = d3.select("#constellation");
+  const W = 1440, H = 560;
+  const margin = { top: 36, right: 28, bottom: 50, left: 180 };
+  const innerW = W - margin.left - margin.right;
+  const innerH = H - margin.top - margin.bottom;
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Build flat list of all films with metadata
+  const all = [];
+  decades.forEach(d => {
+    Object.entries(films[d.id] || {}).forEach(([k, list]) => {
+      list.forEach(f => all.push({ country: k, decade: d.id, title: f[0], year: f[1], villain: f[2] }));
     });
   });
-}
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
-}
-function cssKey(k) { return k.replace(/\s+/g, "-"); }
 
-// initial render
-renderPanel();
+  // Compute lane order — by total count descending
+  const totals = {};
+  keys.forEach(k => totals[k] = all.filter(f => f.country === k).length);
+  const lanes = keys.slice().sort((a,b) => totals[b] - totals[a]);
+
+  const xScale = d3.scaleLinear().domain([1940, 2025]).range([0, innerW]);
+  const yScale = d3.scalePoint().domain(lanes).range([20, innerH - 10]).padding(0.4);
+
+  // event lines first
+  events.forEach(ev => {
+    const x = xScale(ev.year);
+    g.append("line").attr("class","event-line")
+      .attr("x1", x).attr("x2", x).attr("y1", 0).attr("y2", innerH);
+    g.append("text").attr("class","event-label")
+      .attr("x", x).attr("y", -10).attr("text-anchor","middle")
+      .append("tspan").attr("class","year").text(ev.year);
+  });
+
+  // lane lines + labels
+  lanes.forEach(k => {
+    const y = yScale(k);
+    g.append("line").attr("class","lane-line")
+      .attr("x1", 0).attr("x2", innerW).attr("y1", y).attr("y2", y);
+    svg.append("text").attr("class","lane-label")
+      .attr("x", margin.left - 14).attr("y", y + margin.top + 4)
+      .attr("text-anchor","end")
+      .text((fullNames[k] || k).toUpperCase().replace(" / ", "/"));
+    svg.append("text").attr("class","lane-count")
+      .attr("x", margin.left - 14).attr("y", y + margin.top + 18)
+      .attr("text-anchor","end")
+      .text("n=" + totals[k]);
+  });
+
+  // x-axis (decades)
+  decades.forEach(d => {
+    const x = xScale(d.year);
+    g.append("text").attr("class","decade-tick")
+      .attr("x", x).attr("y", innerH + 24).attr("text-anchor","middle")
+      .text(d.label);
+  });
+  g.append("line").attr("class","axis-line")
+    .attr("x1", 0).attr("x2", innerW).attr("y1", innerH + 8).attr("y2", innerH + 8);
+
+  // dots with slight horizontal jitter so duplicates in the same year don't overlap
+  const tip = document.getElementById("constellation-tip");
+  const wrap = document.getElementById("constellation-wrap");
+  // group films by lane+year for jitter
+  const cells = d3.group(all, f => f.country, f => f.year);
+
+  all.forEach(f => {
+    const yearGroup = cells.get(f.country).get(f.year);
+    const idx = yearGroup.indexOf(f);
+    const n = yearGroup.length;
+    const jitterRange = Math.min(14, n * 4);
+    const jitter = n === 1 ? 0 : ((idx - (n - 1) / 2) / Math.max(1, n - 1)) * jitterRange;
+
+    g.append("circle")
+      .attr("class","dot")
+      .attr("cx", xScale(f.year) + jitter)
+      .attr("cy", yScale(f.country))
+      .attr("r", 5)
+      .attr("fill", colors[f.country])
+      .attr("stroke", "rgba(20,20,15,0.45)")
+      .attr("stroke-width", 0.6)
+      .style("opacity", 0)
+      .on("mouseenter", function(event){
+        d3.select(this).attr("r", 8);
+        tip.innerHTML = `
+          <div class="t-year">${f.year}</div>
+          <div class="t-title">${escapeHtml(f.title)}</div>
+          <div class="t-villain">${escapeHtml(f.villain)}</div>
+          <div class="t-country">${fullNames[f.country].toUpperCase()}</div>`;
+        tip.style.opacity = 1;
+      })
+      .on("mousemove", function(event){
+        const rect = wrap.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        tip.style.left = (x + 14) + "px";
+        tip.style.top = (y - 10) + "px";
+      })
+      .on("mouseleave", function(){
+        d3.select(this).attr("r", 5);
+        tip.style.opacity = 0;
+      })
+      .transition()
+      .delay(Math.random() * 400)
+      .duration(500)
+      .style("opacity", 0.92);
+  });
+})();
+
+// ============================================================
+// EXHIBIT C · WORLD MAP
+// ============================================================
+(async function buildMap(){
+  const svg = d3.select("#worldmap");
+  const W = 1440, H = 720;
+  const tip = document.getElementById("map-tip");
+  const frame = document.getElementById("map-frame");
+
+  // controls — decade pills
+  const pillBar = d3.select("#map-decade-pills");
+  decades.forEach(d => {
+    pillBar.append("button").attr("class","pill")
+      .attr("data-decade", d.id).text(d.label)
+      .on("click", function(){
+        currentDecade = d.id;
+        d3.selectAll("#map-decade-pills .pill").classed("active", function(){
+          return this.dataset.decade === currentDecade;
+        });
+        renderMap();
+      });
+  });
+  let currentDecade = "2010s";
+  d3.selectAll("#map-decade-pills .pill").classed("active", function(){ return this.dataset.decade === currentDecade; });
+
+  // loading state
+  const loading = svg.append("text")
+    .attr("x", W/2).attr("y", H/2)
+    .attr("text-anchor","middle").attr("class","map-legend")
+    .text("/// LOADING WORLD ATLAS ///");
+
+  // load world topo
+  let world;
+  try {
+    world = await d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json");
+  } catch (err){
+    loading.text("// world atlas unavailable //");
+    return;
+  }
+  loading.remove();
+  const countriesGeo = topojson.feature(world, world.objects.countries);
+
+  const projection = d3.geoNaturalEarth1().fitSize([W, H * 0.92], countriesGeo);
+  const path = d3.geoPath(projection);
+
+  // sphere outline + graticule
+  svg.append("path").attr("class","sphere").attr("d", path({ type: "Sphere" }));
+  svg.append("path").attr("class","graticule").attr("d", path(d3.geoGraticule10()));
+
+  // countries
+  const countryPath = svg.append("g").selectAll("path")
+    .data(countriesGeo.features).enter().append("path")
+      .attr("class", d => {
+        const cat = isoToCategory[+d.id];
+        return "land" + (cat ? " tagged" : "");
+      })
+      .attr("d", path)
+      .attr("fill", "#b8a679")
+      .on("mouseenter", function(event, d){
+        const cat = isoToCategory[+d.id];
+        if (!cat) return;
+        const list = (films[currentDecade] || {})[cat] || [];
+        tip.innerHTML = `
+          <div class="country">${(d.properties.name || "—").toUpperCase()}</div>
+          <div style="font-size:10px;letter-spacing:0.2em;color:rgba(216,201,160,0.7)">
+            ${fullNames[cat].toUpperCase()} · ${currentDecade.toUpperCase()}
+          </div>
+          <div style="margin-top:8px;font-size:13px"><strong>${list.length}</strong> film${list.length===1?'':'s'} in sample</div>
+          ${list.length ? `<div class="films-list">${list.slice(0,5).map(f => `&middot; ${escapeHtml(f[0])} <span style="opacity:0.6">(${f[1]})</span>`).join("<br/>")}${list.length>5 ? `<br/>… +${list.length-5} more` : ""}</div>` : ""}
+        `;
+        tip.style.opacity = 1;
+      })
+      .on("mousemove", function(event){
+        const rect = frame.getBoundingClientRect();
+        tip.style.left = (event.clientX - rect.left + 14) + "px";
+        tip.style.top = (event.clientY - rect.top - 10) + "px";
+      })
+      .on("mouseleave", function(){ tip.style.opacity = 0; });
+
+  // color scale legend
+  const legendG = svg.append("g").attr("transform", `translate(40, ${H - 50})`);
+  legendG.append("text").attr("class","map-legend").attr("y", -10).text("Films in decade →");
+  const swatchN = 6;
+  for (let i = 0; i < swatchN; i++){
+    legendG.append("rect")
+      .attr("x", i * 30).attr("y", 0).attr("width", 28).attr("height", 14)
+      .attr("fill", colorForCount(i, swatchN - 1));
+  }
+  legendG.append("text").attr("class","map-legend")
+    .attr("x", 0).attr("y", 28).text("0");
+  legendG.append("text").attr("class","map-legend")
+    .attr("x", (swatchN - 1) * 30 + 28).attr("y", 28).attr("text-anchor","end").text("10+");
+
+  function colorForCount(c, max){
+    if (c === 0) return "#b8a679";
+    const t = Math.min(1, c / max);
+    return d3.interpolateRgb("#d8c9a0", "#b03020")(0.3 + 0.7 * t);
+  }
+
+  function renderMap(){
+    const decadeFilms = films[currentDecade] || {};
+    // For each country in geometry, find its category and count
+    countryPath.transition().duration(600)
+      .attr("fill", d => {
+        const cat = isoToCategory[+d.id];
+        if (!cat) return "#b8a679";
+        // For regional categories distribute the total across the geographic countries that belong to it
+        const total = (decadeFilms[cat] || []).length;
+        const regionCount = Object.values(isoToCategory).filter(c => c === cat).length;
+        const perCountry = total / regionCount;
+        return colorForCount(perCountry, 10);
+      });
+  }
+  renderMap();
+})();
+
+// ============================================================
+// EXHIBIT D · SIGNAL / HORIZON sparklines
+// ============================================================
+(function buildSignal(){
+  const axisEl = document.getElementById("signal-axis");
+  const gridEl = document.getElementById("signal-grid");
+
+  // axis
+  axisEl.innerHTML = `
+    <div>ORIGIN</div>
+    <div class="decades">${decades.map(d => `<span>${d.label}</span>`).join("")}</div>
+    <div style="text-align:right">TOTAL</div>
+  `;
+
+  // sort by total descending
+  const totals = keys.map(k => ({
+    key: k,
+    total: d3.sum(data, d => d[k]),
+    series: data.map(d => d[k])
+  })).sort((a,b) => b.total - a.total);
+
+  // build chart rows
+  totals.forEach(({ key, total, series }) => {
+    const row = document.createElement("div");
+    row.className = "signal-row";
+    row.style.setProperty("--c-color", colors[key]);
+    row.innerHTML = `
+      <div class="signal-name"><div class="swatch"></div>${fullNames[key].toUpperCase()}</div>
+      <div class="signal-chart"></div>
+      <div class="signal-total"><span class="num">${total}</span></div>
+    `;
+    gridEl.appendChild(row);
+
+    const chartEl = row.querySelector(".signal-chart");
+    const W = chartEl.clientWidth || 800, H = 56;
+    const svg = d3.select(chartEl).append("svg")
+      .attr("viewBox", `0 0 ${W} ${H}`)
+      .attr("preserveAspectRatio","none")
+      .style("width","100%").style("height", H + "px").style("display","block");
+
+    const xScale = d3.scaleLinear().domain([0, decades.length - 1]).range([0, W]);
+    const yMax = d3.max(totals, t => d3.max(t.series));
+    const yScale = d3.scaleLinear().domain([0, yMax]).range([H - 4, 6]);
+
+    // baseline
+    svg.append("line").attr("x1", 0).attr("x2", W).attr("y1", H - 4).attr("y2", H - 4)
+      .attr("stroke", "rgba(60,40,20,0.2)").attr("stroke-width", 1);
+
+    // decade vertical guides
+    decades.forEach((d,i) => {
+      svg.append("line")
+        .attr("x1", xScale(i)).attr("x2", xScale(i))
+        .attr("y1", 0).attr("y2", H - 4)
+        .attr("stroke", "rgba(60,40,20,0.12)").attr("stroke-width", 0.6);
+    });
+
+    // area
+    const area = d3.area()
+      .x((d,i) => xScale(i))
+      .y0(H - 4)
+      .y1(d => yScale(d))
+      .curve(d3.curveMonotoneX);
+    svg.append("path").attr("d", area(series))
+      .attr("fill", colors[key]).attr("opacity", 0.78);
+
+    // line on top
+    const line = d3.line()
+      .x((d,i) => xScale(i))
+      .y(d => yScale(d))
+      .curve(d3.curveMonotoneX);
+    svg.append("path").attr("d", line(series))
+      .attr("fill","none").attr("stroke", colors[key])
+      .attr("stroke-width", 1.5);
+
+    // dots
+    series.forEach((v,i) => {
+      svg.append("circle")
+        .attr("cx", xScale(i)).attr("cy", yScale(v))
+        .attr("r", v > 0 ? 2.4 : 1.4)
+        .attr("fill", colors[key]);
+    });
+
+    // mark peak
+    const peakIdx = series.indexOf(d3.max(series));
+    if (series[peakIdx] > 0){
+      const peakX = xScale(peakIdx);
+      const peakY = yScale(series[peakIdx]);
+      svg.append("circle")
+        .attr("cx", peakX).attr("cy", peakY)
+        .attr("r", 5).attr("fill","none")
+        .attr("stroke", colors[key]).attr("stroke-width", 1.4);
+      svg.append("text")
+        .attr("x", peakX).attr("y", peakY - 10)
+        .attr("text-anchor", peakIdx > decades.length - 3 ? "end" : peakIdx < 2 ? "start" : "middle")
+        .attr("font-family","'IBM Plex Mono', monospace")
+        .attr("font-size", 9.5)
+        .attr("letter-spacing","0.15em")
+        .attr("fill", colors[key])
+        .attr("font-weight", 700)
+        .text(decades[peakIdx].label.toUpperCase() + " · " + series[peakIdx]);
+    }
+  });
+})();
 </script>
 </body>
 </html>
