@@ -680,32 +680,18 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
   </div>
 
   <nav class="exhibit-nav">
-    <a href="#exhibit-d"><span class="roman">I</span><span class="name">Rankings</span></a>
-    <a href="#exhibit-a"><span class="roman">II</span><span class="name">Overview</span></a>
-    <a href="#exhibit-b"><span class="roman">III</span><span class="name">Every film</span></a>
-    <a href="#exhibit-c"><span class="roman">IV</span><span class="name">World map</span></a>
+    <a href="#exhibit-a"><span class="roman">I</span><span class="name">Overview</span></a>
+    <a href="#exhibit-b"><span class="roman">II</span><span class="name">The dataset</span></a>
+    <a href="#exhibit-c"><span class="roman">III</span><span class="name">World map</span></a>
+    <a href="#exhibit-d"><span class="roman">IV</span><span class="name">By country</span></a>
   </nav>
 </header>
 
 <!-- =========================================================
-     EXHIBIT 1 — RANKINGS (was D)
-     ========================================================= -->
-<section class="exhibit" id="exhibit-d">
-  <div class="exhibit-roman">EXHIBIT 1 OF 4</div>
-  <div class="exhibit-label">RANKINGS</div>
-  <h2>How each country trended over time</h2>
-  <p class="exhibit-deck">
-    Each row is one origin. The little chart shows its film count across the decades, with the peak decade marked. Sorted by lifetime total &mdash; <em>top rows dominated; bottom rows are footnotes.</em>
-  </p>
-  <div class="signal-axis" id="signal-axis"></div>
-  <div class="signal-grid" id="signal-grid"></div>
-</section>
-
-<!-- =========================================================
-     EXHIBIT 2 — STREAMGRAPH (was A)
+     EXHIBIT 1 — STREAMGRAPH (overview)
      ========================================================= -->
 <section class="exhibit" id="exhibit-a">
-  <div class="exhibit-roman">EXHIBIT 2 OF 4</div>
+  <div class="exhibit-roman">EXHIBIT 1 OF 4</div>
   <div class="exhibit-label">OVERVIEW</div>
   <h2>All eleven origins, in one chart</h2>
   <p class="exhibit-deck">
@@ -727,12 +713,12 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 </section>
 
 <!-- =========================================================
-     EXHIBIT 3 — CONSTELLATION (was B)
+     EXHIBIT 2 — CONSTELLATION (the dataset)
      ========================================================= -->
 <section class="exhibit" id="exhibit-b">
-  <div class="exhibit-roman">EXHIBIT 3 OF 4</div>
-  <div class="exhibit-label">EVERY FILM</div>
-  <h2>The whole sample, plotted</h2>
+  <div class="exhibit-roman">EXHIBIT 2 OF 4</div>
+  <div class="exhibit-label">THE DATASET</div>
+  <h2>Every film in the sample, plotted</h2>
   <p class="exhibit-deck">
     Every Hollywood film in the dataset, one dot apiece. The lane is the origin we tagged it to; the horizontal position is its release year. <em>Hover any dot for the film and the villain.</em>
   </p>
@@ -743,10 +729,10 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 </section>
 
 <!-- =========================================================
-     EXHIBIT 4 — WORLD MAP (was C)
+     EXHIBIT 3 — WORLD MAP
      ========================================================= -->
 <section class="exhibit" id="exhibit-c">
-  <div class="exhibit-roman">EXHIBIT 4 OF 4</div>
+  <div class="exhibit-roman">EXHIBIT 3 OF 4</div>
   <div class="exhibit-label">WORLD MAP</div>
   <h2>Where the villains came from</h2>
   <p class="exhibit-deck">
@@ -764,6 +750,20 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
     <svg id="worldmap" viewBox="0 0 1440 720" preserveAspectRatio="xMidYMid meet"></svg>
     <div class="map-tip" id="map-tip"></div>
   </div>
+</section>
+
+<!-- =========================================================
+     EXHIBIT 4 — RANKINGS / HORIZON (by country)
+     ========================================================= -->
+<section class="exhibit" id="exhibit-d">
+  <div class="exhibit-roman">EXHIBIT 4 OF 4</div>
+  <div class="exhibit-label">BY COUNTRY</div>
+  <h2>How each country trended over time</h2>
+  <p class="exhibit-deck">
+    Each row is one origin. The little chart shows its film count across the decades, with the peak decade marked. Sorted by lifetime total &mdash; <em>top rows dominated; bottom rows are footnotes.</em>
+  </p>
+  <div class="signal-axis" id="signal-axis"></div>
+  <div class="signal-grid" id="signal-grid"></div>
 </section>
 
 <footer class="dossier-footer">
@@ -1743,20 +1743,24 @@ const cssKey = k => k.replace(/\s+/g, "-");
   const tip = document.getElementById("map-tip");
   const frame = document.getElementById("map-frame");
 
-  // controls — decade pills
+  // controls — All time + decade pills
   const pillBar = d3.select("#map-decade-pills");
+  let currentDecade = "all";
+  function selectDecade(id){
+    currentDecade = id;
+    d3.selectAll("#map-decade-pills .pill").classed("active", function(){
+      return this.dataset.decade === currentDecade;
+    });
+    renderMap();
+  }
+  pillBar.append("button").attr("class","pill")
+    .attr("data-decade", "all").text("All time")
+    .on("click", () => selectDecade("all"));
   decades.forEach(d => {
     pillBar.append("button").attr("class","pill")
       .attr("data-decade", d.id).text(d.label)
-      .on("click", function(){
-        currentDecade = d.id;
-        d3.selectAll("#map-decade-pills .pill").classed("active", function(){
-          return this.dataset.decade === currentDecade;
-        });
-        renderMap();
-      });
+      .on("click", () => selectDecade(d.id));
   });
-  let currentDecade = "2010s";
   d3.selectAll("#map-decade-pills .pill").classed("active", function(){ return this.dataset.decade === currentDecade; });
 
   // loading state
@@ -1795,14 +1799,18 @@ const cssKey = k => k.replace(/\s+/g, "-");
       .on("mouseenter", function(event, d){
         const cat = isoToCategory[+d.id];
         if (!cat) return;
-        const list = (films[currentDecade] || {})[cat] || [];
+        const cellMap = currentAgg();
+        const list = cellMap[cat] || [];
+        const periodLabel = currentDecade === "all" ? "ALL TIME · 1940s–2020s" : `${fullNames[cat].toUpperCase()} · ${currentDecade.toUpperCase()}`;
+        const labelLine = currentDecade === "all"
+          ? `${fullNames[cat].toUpperCase()} · ALL TIME`
+          : `${fullNames[cat].toUpperCase()} · ${currentDecade.toUpperCase()}`;
+        const sortedList = list.slice().sort((a,b) => a[1] - b[1]);
         tip.innerHTML = `
           <div class="country">${(d.properties.name || "—").toUpperCase()}</div>
-          <div style="font-size:10px;letter-spacing:0.2em;color:rgba(216,201,160,0.7)">
-            ${fullNames[cat].toUpperCase()} · ${currentDecade.toUpperCase()}
-          </div>
+          <div style="font-size:10px;letter-spacing:0.2em;color:rgba(216,201,160,0.7)">${labelLine}</div>
           <div style="margin-top:8px;font-size:13px"><strong>${list.length}</strong> film${list.length===1?'':'s'} in sample</div>
-          ${list.length ? `<div class="films-list">${list.slice(0,5).map(f => `&middot; ${escapeHtml(f[0])} <span style="opacity:0.6">(${f[1]})</span>`).join("<br/>")}${list.length>5 ? `<br/>… +${list.length-5} more` : ""}</div>` : ""}
+          ${sortedList.length ? `<div class="films-list">${sortedList.slice(0,6).map(f => `&middot; ${escapeHtml(f[0])} <span style="opacity:0.6">(${f[1]})</span>`).join("<br/>")}${sortedList.length>6 ? `<br/>… +${sortedList.length-6} more` : ""}</div>` : ""}
         `;
         tip.style.opacity = 1;
       })
@@ -1815,37 +1823,64 @@ const cssKey = k => k.replace(/\s+/g, "-");
 
   // color scale legend
   const legendG = svg.append("g").attr("transform", `translate(40, ${H - 50})`);
-  legendG.append("text").attr("class","map-legend").attr("y", -10).text("Films in decade →");
+  const legendTitle = legendG.append("text").attr("class","map-legend").attr("y", -10);
   const swatchN = 6;
+  const swatches = [];
   for (let i = 0; i < swatchN; i++){
-    legendG.append("rect")
-      .attr("x", i * 30).attr("y", 0).attr("width", 28).attr("height", 14)
-      .attr("fill", colorForCount(i, swatchN - 1));
+    swatches.push(legendG.append("rect")
+      .attr("x", i * 30).attr("y", 0).attr("width", 28).attr("height", 14));
   }
   legendG.append("text").attr("class","map-legend")
     .attr("x", 0).attr("y", 28).text("0");
-  legendG.append("text").attr("class","map-legend")
-    .attr("x", (swatchN - 1) * 30 + 28).attr("y", 28).attr("text-anchor","end").text("10+");
+  const legendMaxText = legendG.append("text").attr("class","map-legend")
+    .attr("x", (swatchN - 1) * 30 + 28).attr("y", 28).attr("text-anchor","end");
 
   function colorForCount(c, max){
-    if (c === 0) return "#b8a679";
+    if (c === 0 || max === 0) return "#b8a679";
     const t = Math.min(1, c / max);
     return d3.interpolateRgb("#d8c9a0", "#b03020")(0.3 + 0.7 * t);
   }
 
+  // count how many ISO codes each category spans (for regional spreading)
+  const regionSize = {};
+  Object.values(isoToCategory).forEach(c => { regionSize[c] = (regionSize[c] || 0) + 1; });
+
+  function aggregateAll(){
+    const out = {};
+    decades.forEach(d => {
+      Object.entries(films[d.id] || {}).forEach(([k, list]) => {
+        out[k] = (out[k] || []).concat(list);
+      });
+    });
+    return out;
+  }
+  function currentAgg(){
+    return currentDecade === "all" ? aggregateAll() : (films[currentDecade] || {});
+  }
+
   function renderMap(){
-    const decadeFilms = films[currentDecade] || {};
-    // For each country in geometry, find its category and count
+    const agg = currentAgg();
+    // per-country max for adaptive color scale
+    const perCountryMax = d3.max(keys, k => {
+      if (!regionSize[k]) return 0;
+      const cnt = (agg[k] || []).length;
+      return cnt / regionSize[k];
+    }) || 1;
+
     countryPath.transition().duration(600)
       .attr("fill", d => {
         const cat = isoToCategory[+d.id];
         if (!cat) return "#b8a679";
-        // For regional categories distribute the total across the geographic countries that belong to it
-        const total = (decadeFilms[cat] || []).length;
-        const regionCount = Object.values(isoToCategory).filter(c => c === cat).length;
-        const perCountry = total / regionCount;
-        return colorForCount(perCountry, 10);
+        const total = (agg[cat] || []).length;
+        const perCountry = total / regionSize[cat];
+        return colorForCount(perCountry, perCountryMax);
       });
+
+    // update legend
+    legendTitle.text(currentDecade === "all" ? "Films per country, all time →" : "Films per country, " + currentDecade + " →");
+    swatches.forEach((rect, i) => rect.attr("fill", colorForCount(i, swatchN - 1)));
+    const maxDisplay = Math.ceil(perCountryMax);
+    legendMaxText.text(maxDisplay + "+");
   }
   renderMap();
 })();
