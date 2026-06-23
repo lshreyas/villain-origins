@@ -584,6 +584,124 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 }
 
 /* =========================================================
+   EXHIBIT 5 — EARNINGS CHART
+   ========================================================= */
+.earnings-chart-frame {
+  background: rgba(184, 166, 121, 0.18);
+  border: 1px solid var(--ink-soft);
+  padding: 24px 18px 12px;
+  margin-bottom: 28px;
+  position: relative;
+}
+.earnings-chart-frame::before {
+  content: 'HOLLYWOOD FOREIGN BOX OFFICE · $B ANNUAL';
+  position: absolute; top: -8px; left: 22px;
+  background: var(--paper);
+  padding: 0 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.3em; color: var(--ink-faint);
+}
+.earnings-line {
+  fill: none; stroke-width: 1.4;
+  opacity: 0.7;
+  transition: opacity 0.18s, stroke-width 0.18s;
+}
+.earnings-line:hover { opacity: 1; stroke-width: 2; }
+.earnings-line.china {
+  stroke-width: 3.2;
+  opacity: 1;
+  stroke: var(--alert);
+}
+.earnings-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  fill: var(--ink);
+}
+.earnings-label.china {
+  fill: var(--alert);
+  font-weight: 700;
+  font-size: 12px;
+}
+.earnings-grid { stroke: var(--ink-faint); stroke-width: 0.4; opacity: 0.3; }
+.earnings-axis-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.15em;
+  fill: var(--ink-faint); text-transform: uppercase;
+}
+.earnings-tick {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  fill: var(--ink-soft);
+}
+.earnings-annotation {
+  font-family: 'Special Elite', monospace;
+  font-size: 11px;
+  fill: var(--alert);
+  letter-spacing: 0.05em;
+}
+.earnings-annotation-line { stroke: var(--alert); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0.7; }
+.earnings-marker { fill: var(--alert); stroke: var(--paper); stroke-width: 1.5; }
+
+.china-insight {
+  background: linear-gradient(180deg, var(--panel) 0%, rgba(20,15,10,0.4) 100%);
+  border: 1.5px solid var(--alert);
+  padding: 32px 36px 28px;
+  position: relative;
+  color: var(--paper);
+}
+.china-insight::before {
+  content: '/// ANALYTICAL FOOTNOTE ///';
+  position: absolute; top: -8px; left: 24px;
+  background: var(--paper);
+  color: var(--alert);
+  padding: 0 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.32em; font-weight: 700;
+}
+.china-insight-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 36px;
+}
+.china-insight-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.3em;
+  color: var(--accent, #e9c46a);
+  margin-bottom: 8px;
+  color: var(--paper-3);
+  opacity: 0.8;
+}
+.china-insight-headline {
+  font-family: 'Special Elite', monospace;
+  font-size: 22px; letter-spacing: 0.02em;
+  color: var(--paper);
+  margin-bottom: 12px;
+  line-height: 1.1;
+}
+.china-insight-body {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 14px; line-height: 1.55;
+  color: var(--paper-3);
+}
+.china-insight-body strong { color: var(--paper); font-weight: 600; }
+.china-insight-body em { color: var(--accent); font-style: italic; }
+.china-followup {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px dashed rgba(216, 201, 160, 0.3);
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 14px;
+  color: var(--paper-3);
+  line-height: 1.5;
+  font-style: italic;
+}
+@media (max-width: 760px) {
+  .china-insight-grid { grid-template-columns: 1fr; gap: 24px; }
+  .china-insight { padding: 24px 22px; }
+}
+
+/* =========================================================
    FOOTER
    ========================================================= */
 .dossier-footer {
@@ -672,7 +790,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
       <br/><br/>
       Period<span class="v">1940 – 2025</span>
       <br/><br/>
-      Sample<span class="v">~280 iconic features</span>
+      Sample<span class="v">~500 iconic features</span>
     </div>
     <div class="synopsis-body">
       Every era picks its enemies. Eight decades of Hollywood's primary antagonists &mdash; tagged by country of origin &mdash; constitute a moving record of who America has been afraid of. <em>Nazis fade. Soviets crest twice, separated by an interregnum. The Middle East surges after September 2001. But the loudest, most persistent villain &mdash; from the 1970s on &mdash; has been America itself.</em>
@@ -684,6 +802,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
     <a href="#exhibit-b"><span class="roman">II</span><span class="name">The dataset</span></a>
     <a href="#exhibit-c"><span class="roman">III</span><span class="name">World map</span></a>
     <a href="#exhibit-d"><span class="roman">IV</span><span class="name">By country</span></a>
+    <a href="#exhibit-e"><span class="roman">V</span><span class="name">The China question</span></a>
   </nav>
 </header>
 
@@ -691,7 +810,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
      EXHIBIT 1 — STREAMGRAPH (overview)
      ========================================================= -->
 <section class="exhibit" id="exhibit-a">
-  <div class="exhibit-roman">EXHIBIT 1 OF 4</div>
+  <div class="exhibit-roman">EXHIBIT 1 OF 5</div>
   <div class="exhibit-label">OVERVIEW</div>
   <h2>All eleven origins, in one chart</h2>
   <p class="exhibit-deck">
@@ -716,7 +835,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
      EXHIBIT 2 — CONSTELLATION (the dataset)
      ========================================================= -->
 <section class="exhibit" id="exhibit-b">
-  <div class="exhibit-roman">EXHIBIT 2 OF 4</div>
+  <div class="exhibit-roman">EXHIBIT 2 OF 5</div>
   <div class="exhibit-label">THE DATASET</div>
   <h2>Every film in the sample, plotted</h2>
   <p class="exhibit-deck">
@@ -732,7 +851,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
      EXHIBIT 3 — WORLD MAP
      ========================================================= -->
 <section class="exhibit" id="exhibit-c">
-  <div class="exhibit-roman">EXHIBIT 3 OF 4</div>
+  <div class="exhibit-roman">EXHIBIT 3 OF 5</div>
   <div class="exhibit-label">WORLD MAP</div>
   <h2>Where the villains came from</h2>
   <p class="exhibit-deck">
@@ -756,7 +875,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
      EXHIBIT 4 — RANKINGS / HORIZON (by country)
      ========================================================= -->
 <section class="exhibit" id="exhibit-d">
-  <div class="exhibit-roman">EXHIBIT 4 OF 4</div>
+  <div class="exhibit-roman">EXHIBIT 4 OF 5</div>
   <div class="exhibit-label">BY COUNTRY</div>
   <h2>How each country trended over time</h2>
   <p class="exhibit-deck">
@@ -764,6 +883,45 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
   </p>
   <div class="signal-axis" id="signal-axis"></div>
   <div class="signal-grid" id="signal-grid"></div>
+</section>
+
+<!-- =========================================================
+     EXHIBIT 5 — THE CHINA QUESTION
+     ========================================================= -->
+<section class="exhibit" id="exhibit-e">
+  <div class="exhibit-roman">EXHIBIT 5 OF 5</div>
+  <div class="exhibit-label">THE CHINA QUESTION</div>
+  <h2>Why isn't China the villain?</h2>
+  <p class="exhibit-deck">
+    China appears as the primary antagonist in only a handful of the 500+ films in our sample &mdash; even as the country sat at the center of two decades of geopolitical anxiety. The most likely reason is sitting in the chart below. <em>From the mid-2010s, Hollywood needed China at the box office.</em> Tentpoles seeking SARFT/CFGC approval to release in China had every incentive to scrub Chinese antagonists from scripts.
+  </p>
+
+  <div class="earnings-chart-frame">
+    <svg id="earnings-chart" viewBox="0 0 1440 540" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div class="china-insight">
+    <div class="china-insight-grid">
+      <div>
+        <div class="china-insight-label">/// FINDING ///</div>
+        <div class="china-insight-headline">The inverse pattern</div>
+        <p class="china-insight-body">
+          China's Hollywood box office surged 11&times; between 2010 and 2017, peaking at <strong>$3.4B</strong>. Over that same decade our dataset tags only <strong>2 films</strong> in which the primary villain is identifiably Chinese (<em>Skyscraper</em>, <em>The Great Wall</em>). Russia, with a fraction of the box office, took <strong>~10&times;</strong> as many villain roles in the same window.
+        </p>
+      </div>
+      <div>
+        <div class="china-insight-label">/// MECHANISM ///</div>
+        <div class="china-insight-headline">Approval, not avoidance</div>
+        <p class="china-insight-body">
+          China's film authority limits foreign films to a quota of imports per year and reviews each title for politically sensitive content. Studios who wanted access &mdash; effectively every tentpole &mdash; rewrote, recut, or never wrote Chinese antagonists in the first place. Notable cases: <em>Red Dawn</em> (2012) digitally swapping Chinese villains for North Korean; <em>World War Z</em> moving outbreak origin; <em>Top Gun: Maverick</em> patches reportedly altered for China release.
+        </p>
+      </div>
+    </div>
+    <div class="china-followup">
+      <div class="china-insight-label">/// OPEN QUESTION ///</div>
+      Whether China's Hollywood market continues shrinking post-2024 &mdash; and whether Chinese villains return as a result &mdash; is the next test of this hypothesis.
+    </div>
+  </div>
 </section>
 
 <footer class="dossier-footer">
@@ -2292,6 +2450,199 @@ const cssKey = k => k.replace(/\s+/g, "-");
         .attr("font-weight", 700)
         .text(decades[peakIdx].label.toUpperCase() + " · " + series[peakIdx]);
     }
+  });
+})();
+
+// ============================================================
+// EXHIBIT 5 · HOLLYWOOD FOREIGN BOX OFFICE (THE CHINA QUESTION)
+// ============================================================
+(function buildEarningsChart(){
+  // Approximate Hollywood foreign box office, $B annual.
+  // Compiled from MPAA THEME reports, IMDb Pro, Box Office Mojo,
+  // and trade press reporting on overseas grosses. Figures are
+  // best-effort estimates — directionally accurate, not precise.
+  const earnings = {
+    "China":           [[2000,0.1],[2002,0.15],[2004,0.2],[2006,0.25],[2008,0.25],[2010,0.3],[2011,0.6],[2012,1.0],[2013,1.5],[2014,2.1],[2015,2.4],[2016,3.0],[2017,3.4],[2018,3.2],[2019,2.6],[2020,0.6],[2021,1.0],[2022,0.5],[2023,0.7],[2024,0.4]],
+    "United Kingdom":  [[2000,1.0],[2002,1.1],[2004,1.2],[2006,1.3],[2008,1.4],[2010,1.5],[2012,1.6],[2014,1.9],[2015,2.0],[2016,2.1],[2017,2.2],[2018,2.2],[2019,2.3],[2020,0.9],[2021,1.3],[2022,1.6],[2023,1.8],[2024,1.7]],
+    "Japan":           [[2000,1.6],[2002,1.5],[2004,1.5],[2006,1.5],[2008,1.7],[2010,1.8],[2012,1.6],[2014,1.5],[2016,1.5],[2018,1.7],[2019,1.8],[2020,0.5],[2021,0.9],[2022,1.3],[2023,1.5],[2024,1.4]],
+    "Germany":         [[2000,0.7],[2002,0.8],[2004,0.8],[2006,0.8],[2008,0.9],[2010,1.0],[2012,1.0],[2014,1.1],[2016,1.1],[2018,1.1],[2019,1.1],[2020,0.4],[2021,0.6],[2022,0.8],[2023,0.8],[2024,0.7]],
+    "France":          [[2000,0.6],[2002,0.7],[2004,0.7],[2006,0.7],[2008,0.8],[2010,0.9],[2012,0.9],[2014,0.9],[2016,1.0],[2018,1.0],[2019,1.0],[2020,0.3],[2021,0.5],[2022,0.7],[2023,0.7],[2024,0.7]],
+    "South Korea":     [[2000,0.3],[2002,0.4],[2004,0.5],[2006,0.5],[2008,0.5],[2010,0.5],[2012,0.7],[2014,0.8],[2016,0.9],[2018,1.0],[2019,1.0],[2020,0.4],[2021,0.5],[2022,0.7],[2023,0.7],[2024,0.6]],
+    "Russia":          [[2000,0.2],[2002,0.2],[2004,0.3],[2006,0.3],[2008,0.4],[2010,0.5],[2012,0.6],[2014,0.7],[2016,0.6],[2018,0.7],[2019,0.7],[2020,0.3],[2021,0.5],[2022,0.1],[2023,0.0],[2024,0.0]],
+    "Mexico":          [[2000,0.3],[2002,0.3],[2004,0.4],[2006,0.4],[2008,0.4],[2010,0.5],[2012,0.5],[2014,0.6],[2016,0.6],[2018,0.6],[2019,0.6],[2020,0.2],[2021,0.4],[2022,0.5],[2023,0.5],[2024,0.5]]
+  };
+
+  const lineColors = {
+    "China":          "#b03020",  // alert red — highlighted
+    "United Kingdom": "#1a3550",
+    "Japan":          "#a05a30",
+    "Germany":        "#5a1818",
+    "France":         "#475670",
+    "South Korea":    "#3d6b3d",
+    "Russia":         "#7a3a30",
+    "Mexico":         "#7a5530"
+  };
+
+  const svg = d3.select("#earnings-chart");
+  const W = 1440, H = 540;
+  const margin = { top: 50, right: 200, bottom: 60, left: 70 };
+  const innerW = W - margin.left - margin.right;
+  const innerH = H - margin.top - margin.bottom;
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const xScale = d3.scaleLinear().domain([2000, 2024]).range([0, innerW]);
+  const yScale = d3.scaleLinear().domain([0, 3.6]).range([innerH, 0]);
+
+  // Y gridlines + ticks
+  const yTicks = [0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5];
+  yTicks.forEach(t => {
+    g.append("line").attr("class","earnings-grid")
+      .attr("x1", 0).attr("x2", innerW)
+      .attr("y1", yScale(t)).attr("y2", yScale(t));
+    g.append("text").attr("class","earnings-tick")
+      .attr("x", -10).attr("y", yScale(t) + 4)
+      .attr("text-anchor","end").text("$" + t.toFixed(1) + "B");
+  });
+
+  // X axis: 2000, 2005, 2010, 2015, 2020, 2024
+  const xTicks = [2000, 2005, 2010, 2015, 2020, 2024];
+  xTicks.forEach(t => {
+    g.append("line").attr("class","earnings-grid")
+      .attr("x1", xScale(t)).attr("x2", xScale(t))
+      .attr("y1", 0).attr("y2", innerH);
+    g.append("text").attr("class","earnings-tick")
+      .attr("x", xScale(t)).attr("y", innerH + 22)
+      .attr("text-anchor","middle").text(t);
+  });
+
+  // axis labels
+  g.append("text").attr("class","earnings-axis-label")
+    .attr("x", innerW / 2).attr("y", innerH + 48)
+    .attr("text-anchor","middle").text("YEAR");
+  g.append("text").attr("class","earnings-axis-label")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -innerH / 2).attr("y", -50)
+    .attr("text-anchor","middle").text("$USD BILLIONS · ANNUAL");
+
+  // line generator
+  const line = d3.line()
+    .x(d => xScale(d[0]))
+    .y(d => yScale(d[1]))
+    .curve(d3.curveMonotoneX);
+
+  // draw non-China lines first
+  const orderedKeys = ["United Kingdom", "Japan", "Germany", "France", "South Korea", "Russia", "Mexico", "China"];
+  orderedKeys.forEach(country => {
+    if (country === "China") return;
+    g.append("path").datum(earnings[country])
+      .attr("class","earnings-line")
+      .attr("stroke", lineColors[country])
+      .attr("d", line);
+    // end-of-line label
+    const last = earnings[country][earnings[country].length - 1];
+    g.append("text").attr("class","earnings-label")
+      .attr("x", xScale(last[0]) + 8)
+      .attr("y", yScale(last[1]) + 4)
+      .text(country);
+  });
+
+  // China line on top
+  g.append("path").datum(earnings["China"])
+    .attr("class","earnings-line china")
+    .attr("d", line);
+  // China end label
+  const chinaLast = earnings["China"][earnings["China"].length - 1];
+  g.append("text").attr("class","earnings-label china")
+    .attr("x", xScale(chinaLast[0]) + 8)
+    .attr("y", yScale(chinaLast[1]) + 4)
+    .text("CHINA");
+
+  // Peak annotation for China — 2017 at $3.4B
+  const peakX = xScale(2017);
+  const peakY = yScale(3.4);
+  g.append("line").attr("class","earnings-annotation-line")
+    .attr("x1", peakX).attr("x2", peakX)
+    .attr("y1", peakY).attr("y2", peakY - 38);
+  g.append("circle").attr("class","earnings-marker")
+    .attr("cx", peakX).attr("cy", peakY).attr("r", 5);
+  g.append("text").attr("class","earnings-annotation")
+    .attr("x", peakX).attr("y", peakY - 46)
+    .attr("text-anchor","middle")
+    .text("$3.4B · 2017 peak");
+
+  // Annotation for 2020 collapse
+  const collapseX = xScale(2020);
+  const collapseY = yScale(0.6);
+  g.append("text").attr("class","earnings-annotation")
+    .attr("x", collapseX).attr("y", collapseY + 26)
+    .attr("text-anchor","middle")
+    .style("fill", "var(--ink-soft)")
+    .style("font-size","10.5px")
+    .text("COVID + decoupling");
+
+  // Era stripe — highlight 2014–2019 boom window
+  g.append("rect")
+    .attr("x", xScale(2014)).attr("y", 0)
+    .attr("width", xScale(2019) - xScale(2014))
+    .attr("height", innerH)
+    .attr("fill", "rgba(176, 48, 32, 0.05)")
+    .attr("stroke", "rgba(176, 48, 32, 0.18)")
+    .attr("stroke-width", 0.5)
+    .attr("stroke-dasharray", "2 4");
+  g.append("text").attr("class","earnings-axis-label")
+    .attr("x", (xScale(2014) + xScale(2019)) / 2).attr("y", 18)
+    .attr("text-anchor","middle")
+    .style("fill", "rgba(176, 48, 32, 0.7)")
+    .style("letter-spacing","0.32em")
+    .text("THE BOOM YEARS");
+
+  // China villain count overlay — small inline chart at bottom right
+  const villainData = decades
+    .filter(d => d.year >= 2000)
+    .map(d => [d.year, (films[d.id]?.["China"] || []).length]);
+  // also add the per-year recent decade granularity
+  const inlineW = 220, inlineH = 80;
+  const inlineX = innerW - inlineW - 10;
+  const inlineY = innerH - inlineH - 10;
+  const inlineG = g.append("g").attr("transform", `translate(${inlineX},${inlineY})`);
+
+  inlineG.append("rect")
+    .attr("x", 0).attr("y", 0).attr("width", inlineW).attr("height", inlineH)
+    .attr("fill", "rgba(10, 10, 12, 0.85)")
+    .attr("stroke", "var(--alert)").attr("stroke-width", 1);
+
+  inlineG.append("text")
+    .attr("x", 10).attr("y", 18)
+    .attr("font-family","'IBM Plex Mono', monospace")
+    .attr("font-size", 9).attr("letter-spacing","0.25em")
+    .attr("fill", "var(--paper-3)")
+    .text("CHINA VILLAIN COUNT BY DECADE");
+
+  const inlineXS = d3.scaleLinear().domain([2000, 2024]).range([12, inlineW - 14]);
+  const maxV = d3.max(villainData, d => d[1]) || 1;
+  const inlineYS = d3.scaleLinear().domain([0, Math.max(3, maxV)]).range([inlineH - 14, 28]);
+  const barW = 18;
+  villainData.forEach(([y, v]) => {
+    inlineG.append("rect")
+      .attr("x", inlineXS(y) - barW/2).attr("y", inlineYS(v))
+      .attr("width", barW).attr("height", inlineH - 14 - inlineYS(v))
+      .attr("fill", "var(--alert)").attr("opacity", 0.85);
+    inlineG.append("text")
+      .attr("x", inlineXS(y)).attr("y", inlineYS(v) - 4)
+      .attr("text-anchor","middle")
+      .attr("font-family","'IBM Plex Mono', monospace")
+      .attr("font-size", 9).attr("fill", "var(--paper)")
+      .text(v);
+  });
+  // axis labels
+  villainData.forEach(([y]) => {
+    const dec = decades.find(d => d.year === y);
+    inlineG.append("text")
+      .attr("x", inlineXS(y)).attr("y", inlineH - 4)
+      .attr("text-anchor","middle")
+      .attr("font-family","'IBM Plex Mono', monospace")
+      .attr("font-size", 8.5).attr("fill", "var(--paper-3)")
+      .text(dec.label.slice(0,3));
   });
 })();
 </script>
