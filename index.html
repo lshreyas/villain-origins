@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Changing Face of the Villain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0a10;
+    --bg-soft: #14141d;
+    --panel: #141420;
+    --ink: #f5f1e8;
+    --ink-dim: #a89e8c;
+    --ink-faint: #555064;
+    --line: #2a2837;
+    --accent: #e9c46a;
+    --accent-warm: #f0a868;
+    --accent-blood: #e63946;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background:
+      radial-gradient(ellipse 70% 50% at 20% -10%, rgba(230, 57, 70, 0.10), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 60%, rgba(106, 142, 174, 0.08), transparent 60%),
+      radial-gradient(ellipse 100% 60% at 50% 100%, rgba(233, 196, 106, 0.05), transparent 70%),
+      var(--bg);
+    min-height: 100vh;
+    padding: 60px 40px 100px;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.3   0 0 0 0 0.28   0 0 0 0 0.22   0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity: 0.55;
+    mix-blend-mode: overlay;
+    z-index: 999;
+  }
+  .container { max-width: 1500px; margin: 0 auto; position: relative; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 22px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .eyebrow::before, .eyebrow::after {
+    content: '';
+    height: 1px;
+    background: var(--accent);
+    opacity: 0.4;
+    flex: 0 0 32px;
+  }
+  .eyebrow::after { flex: 1; opacity: 0.15; max-width: 400px; }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: clamp(44px, 7vw, 104px);
+    line-height: 0.92;
+    letter-spacing: -0.025em;
+    margin-bottom: 28px;
+    max-width: 1200px;
+  }
+  h1 .accent {
+    font-style: italic;
+    font-weight: 400;
+    background: linear-gradient(120deg, var(--accent) 0%, var(--accent-warm) 50%, var(--accent-blood) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    padding-right: 0.1em;
+  }
+  h1 .underline {
+    display: inline-block;
+    position: relative;
+  }
+  h1 .underline::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 0.05em;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-blood), var(--accent), transparent);
+    opacity: 0.7;
+  }
+  .deck {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(18px, 1.7vw, 24px);
+    color: var(--ink-dim);
+    max-width: 780px;
+    line-height: 1.5;
+    margin-bottom: 60px;
+  }
+  .chart-section {
+    position: relative;
+    background: linear-gradient(180deg, rgba(20,20,32,0.4) 0%, rgba(10,10,16,0.2) 100%);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 30px 20px 20px;
+    margin-bottom: 30px;
+  }
+  .chart-section::before, .chart-section::after {
+    content: '';
+    position: absolute; pointer-events: none;
+    width: 16px; height: 16px;
+    border: 1px solid var(--accent);
+    opacity: 0.5;
+  }
+  .chart-section::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+  .chart-section::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+  .chart-wrap { position: relative; width: 100%; }
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .layer {
+    transition: opacity 0.35s ease, filter 0.35s ease;
+    cursor: pointer;
+  }
+  .chart-wrap.hovering .layer { opacity: 0.15; filter: saturate(0.4); }
+  .chart-wrap.hovering .layer.active { opacity: 1; filter: saturate(1.15) brightness(1.05); }
+  .chart-wrap .layer.locked { opacity: 1 !important; filter: saturate(1.2) brightness(1.08) !important; }
+  .chart-wrap.has-locked .layer:not(.locked) { opacity: 0.12 !important; filter: saturate(0.3) !important; }
+  .stream-label {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    fill: var(--ink);
+    pointer-events: none;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    letter-spacing: 0.05em;
+  }
+  .stream-label.dark { fill: #14171f; text-shadow: none; }
+  .stream-label.italic {
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+  .era-band {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    fill: var(--ink-faint);
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+  }
+  .era-rule { stroke: var(--ink-faint); stroke-width: 1; opacity: 0.4; }
+  .decade-tick {
+    font-family: 'JetBrains Mono', monospace;
+    fill: var(--ink-dim);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: fill 0.2s;
+  }
+  .decade-tick:hover { fill: var(--accent); }
+  .decade-tick.active { fill: var(--accent); font-weight: 600; }
+  .decade-count {
+    font-family: 'JetBrains Mono', monospace;
+    fill: var(--ink-faint);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+  .axis-line { stroke: var(--ink-faint); stroke-width: 1; opacity: 0.6; }
+  .event-line { stroke: var(--ink-faint); stroke-width: 1; stroke-dasharray: 2 5; opacity: 0.7; }
+  .event-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    fill: var(--ink-dim);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .event-label .year { fill: var(--accent); font-weight: 600; }
+  .playhead-line { stroke: var(--accent); stroke-width: 1.5; opacity: 0; pointer-events: none; }
+  .playhead-label {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    fill: var(--accent);
+    font-size: 24px;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  /* Control bar */
+  .control-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 30px;
+    padding: 18px 24px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+  .control-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-right: 10px;
+  }
+  .decade-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  .pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 7px 14px;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    transition: all 0.18s;
+    border-radius: 2px;
+  }
+  .pill:hover { color: var(--ink); border-color: var(--ink-faint); }
+  .pill.active {
+    color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .clear-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    background: transparent;
+    border: 1px solid var(--line);
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.18s;
+    border-radius: 2px;
+  }
+  .clear-btn:hover { color: var(--ink); border-color: var(--ink-faint); }
+  .clear-btn.visible { color: var(--accent); border-color: var(--accent); }
+
+  /* Detail panel */
+  .panel {
+    background: linear-gradient(180deg, var(--panel) 0%, rgba(10,10,16,0.6) 100%);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 36px 40px 40px;
+    margin-bottom: 30px;
+    position: relative;
+    min-height: 400px;
+  }
+  .panel::before, .panel::after {
+    content: '';
+    position: absolute;
+    width: 16px; height: 16px;
+    border: 1px solid var(--accent);
+    opacity: 0.3;
+  }
+  .panel::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+  .panel::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+  .panel-header {
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .panel-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: clamp(36px, 4.5vw, 64px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .panel-title .accent { color: var(--accent); font-style: italic; font-weight: 400; }
+  .panel-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .panel-deck {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--ink-dim);
+    font-size: 17px;
+    line-height: 1.5;
+    max-width: 720px;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .country-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 28px;
+  }
+  .country-card {
+    border-left: 3px solid var(--c-color, var(--accent));
+    padding: 4px 0 4px 18px;
+  }
+  .country-card .name-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 10px;
+  }
+  .country-card .name {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 19px;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+  }
+  .country-card .count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--c-color, var(--accent));
+    font-weight: 500;
+  }
+  .film-list { list-style: none; }
+  .film-item {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 10px;
+    padding: 8px 0;
+    border-top: 1px solid var(--line);
+    font-size: 13.5px;
+    line-height: 1.4;
+  }
+  .film-item:first-child { border-top: 0; }
+  .film-item .year {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+    padding-top: 2px;
+  }
+  .film-item .meta { display: flex; flex-direction: column; gap: 2px; }
+  .film-item .title { color: var(--ink); font-weight: 500; }
+  .film-item .villain { color: var(--ink-dim); font-style: italic; font-size: 12.5px; }
+  .empty-state {
+    color: var(--ink-faint);
+    font-style: italic;
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    padding: 40px 0;
+    text-align: center;
+  }
+
+  /* Country mode (across decades) */
+  .timeline-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 24px;
+  }
+  .timeline-decade-card {
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+  }
+  .timeline-decade-card .decade-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 30px;
+    padding-top: 32px;
+    border-top: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 36px;
+    color: var(--ink-dim);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .footer h4 {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+  .footer kbd {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    padding: 1px 6px;
+    border-radius: 2px;
+    color: var(--ink);
+  }
+  @media (max-width: 760px) {
+    body { padding: 40px 20px 80px; }
+    .panel { padding: 24px 20px; }
+    .country-grid { grid-template-columns: 1fr; gap: 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="eyebrow">Hollywood &nbsp;&middot;&nbsp; 1940 – 2025 &nbsp;&middot;&nbsp; n ≈ 280 films</div>
+  <h1>The Changing Face<br/>of the <span class="accent underline">Villain</span></h1>
+  <p class="deck">
+    Every era picks its enemies. Eight decades of Hollywood's bad guys&mdash;
+    a moving mirror of who America has been afraid of.
+  </p>
+
+  <!-- Streamgraph -->
+  <div class="chart-section">
+    <div class="chart-wrap" id="chart-wrap">
+      <svg id="chart" viewBox="0 0 1440 640" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="control-bar">
+    <div class="decade-pills" id="decade-pills">
+      <span class="control-label">Decade</span>
+    </div>
+    <button class="clear-btn" id="clear-btn">Reset selection &nbsp;·&nbsp; ESC</button>
+  </div>
+
+  <!-- Detail panel -->
+  <div class="panel" id="panel"></div>
+
+  <div class="footer">
+    <div>
+      <h4>How to use</h4>
+      Hover the streamgraph to see each decade's villains. Click a stream (or pick a decade pill) to lock the view. Click again, or press <kbd>ESC</kbd>, to release.
+    </div>
+    <div>
+      <h4>Method</h4>
+      A hand-curated sample of well-known Hollywood films, 1940s&ndash;2020s. Each film's primary antagonist tagged by country of origin (or "Non-national" for aliens, AI, monsters, internal demons).
+    </div>
+    <div>
+      <h4>The story</h4>
+      Nazis fade. Soviets crest twice, separated by an interregnum. The Middle East surges after 9/11. But the loudest, most persistent villain&mdash;from the 1970s on&mdash;has been America itself.
+    </div>
+    <div>
+      <h4>Caveats</h4>
+      Iconic films, not exhaustive. Sample-driven. Some characters defy a single flag (Le Chiffre, Keyser Söze, Loki) and are placed where most viewers locate them.
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// THE DATASET — every film, every villain
+// ============================================================
+const decades = [
+  { id: "1940s", year: 1945, label: "1940s", era: "World War II",       deck: "Hollywood mobilizes. Nazi officers and Imperial Japan dominate the screen; even noir villains feel like a wartime hangover." },
+  { id: "1950s", year: 1955, label: "1950s", era: "The Red scare",      deck: "The Soviet spy enters the bloodstream. Aliens stand in for Communists. Domestic anxiety simmers under the surface of small-town America." },
+  { id: "1960s", year: 1965, label: "1960s", era: "Cold War peak",      deck: "James Bond institutionalizes the Soviet villain. SPECTRE, Red China, and the Manchurian Candidate. Meanwhile, the call is coming from inside the house: Norman Bates, the Corleones-to-be." },
+  { id: "1970s", year: 1975, label: "1970s", era: "The Disillusion",    deck: "Watergate, Vietnam, the oil crisis. Hollywood turns its lens inward: corrupt cops, evil corporations, broken families. The villain is now us." },
+  { id: "1980s", year: 1985, label: "1980s", era: "Reagan's America",   deck: "Soviets return at maximum volume&mdash;Drago, Red Dawn, Rambo. Nazi-looters chase Indiana Jones. Yuppies and corporations metastasize. The screen has never been so divided between Russian and American villains." },
+  { id: "1990s", year: 1995, label: "1990s", era: "Unipolar moment",    deck: "The Wall falls. Briefly, the Russians are reduced to mobsters. Terrorists, Serbians, and rogue generals fill the gap. Domestic serial killers and Wall Street rise to dominate." },
+  { id: "2000s", year: 2005, label: "2000s", era: "War on Terror",      deck: "9/11 reshapes everything. The Middle East ribbon swells; Iraq, Saudi Arabia, Afghanistan, Persia and 300's Xerxes all appear. Behind it, billionaires, oil men, and Joker emerge as the new domestic id." },
+  { id: "2010s", year: 2015, label: "2010s", era: "The Return",         deck: "Russia comes back&mdash;John Wick, Atomic Blonde, MI: Ghost Protocol. North Korea has a brief moment. But the loudest villains are American: tech bros, white supremacists, the Get Out family." },
+  { id: "2020s", year: 2023, label: "2020s", era: "Anxious present",    deck: "The villain is the algorithm, the billionaire, the autocrat, the bomb. Russia returns again. AI takes over for the alien. The line between bad guy and protagonist has nearly disappeared." }
+];
+
+// films[decade][country] = [[title, year, villain], ...]
+const films = {
+  "1940s": {
+    Germany: [
+      ["Casablanca", 1942, "Maj. Heinrich Strasser"],
+      ["Notorious", 1946, "Alex Sebastian"],
+      ["Foreign Correspondent", 1940, "Stephen Fisher"],
+      ["Lifeboat", 1944, "Willi"],
+      ["Sahara", 1943, "Capt. von Schletow"],
+      ["To Be or Not to Be", 1942, "Col. Ehrhardt"],
+      ["Sergeant York", 1941, "The German Army"],
+      ["Watch on the Rhine", 1943, "Teck de Brancovis"]
+    ],
+    Japan: [
+      ["Bataan", 1943, "Imperial Japanese Army"],
+      ["Thirty Seconds Over Tokyo", 1944, "Japanese Forces"],
+      ["Air Force", 1943, "Japanese Forces"],
+      ["They Were Expendable", 1945, "Imperial Japanese Navy"]
+    ],
+    UK: [
+      ["The Maltese Falcon", 1941, "Kasper Gutman"]
+    ],
+    "Latin America": [
+      ["The Treasure of the Sierra Madre", 1948, "Gold Hat"]
+    ],
+    USA: [
+      ["Double Indemnity", 1944, "Phyllis Dietrichson"],
+      ["Key Largo", 1948, "Johnny Rocco"],
+      ["The Big Sleep", 1946, "Eddie Mars"],
+      ["Mildred Pierce", 1945, "Monte Beragon"]
+    ],
+    Other: [
+      ["The Wolf Man", 1941, "The Werewolf"]
+    ]
+  },
+  "1950s": {
+    Germany: [
+      ["Stalag 17", 1953, "Price (Nazi mole)"],
+      ["The Young Lions", 1958, "Christian Diestl"],
+      ["Decision Before Dawn", 1951, "Nazi remnants"]
+    ],
+    Russia: [
+      ["Pickup on South Street", 1953, "Joey (Communist agent)"],
+      ["North by Northwest", 1959, "Phillip Vandamm"],
+      ["My Son John", 1952, "John Jefferson"],
+      ["Big Jim McLain", 1952, "Sturak"]
+    ],
+    China: [
+      ["The Bridges at Toko-Ri", 1954, "Communist forces"]
+    ],
+    Japan: [
+      ["The Bridge on the River Kwai", 1957, "Col. Saito"],
+      ["Three Came Home", 1950, "Col. Suga"]
+    ],
+    UK: [
+      ["The Third Man", 1949, "Harry Lime"]
+    ],
+    "Latin America": [
+      ["Touch of Evil", 1958, "Grandi crime family"]
+    ],
+    USA: [
+      ["Strangers on a Train", 1951, "Bruno Antony"],
+      ["Rear Window", 1954, "Lars Thorwald"],
+      ["Sunset Boulevard", 1950, "Norma Desmond"],
+      ["The Night of the Hunter", 1955, "Harry Powell"],
+      ["Touch of Evil", 1958, "Hank Quinlan"],
+      ["Vertigo", 1958, "Gavin Elster"]
+    ],
+    Other: [
+      ["The Day the Earth Stood Still", 1951, "Humanity itself"],
+      ["The War of the Worlds", 1953, "Martians"],
+      ["Forbidden Planet", 1956, "The Id Monster"]
+    ]
+  },
+  "1960s": {
+    Germany: [
+      ["Goldfinger", 1964, "Auric Goldfinger"],
+      ["The Train", 1964, "Col. von Waldheim"]
+    ],
+    Russia: [
+      ["From Russia with Love", 1963, "Rosa Klebb / SPECTRE"],
+      ["Dr. Strangelove", 1964, "Soviet Doomsday Device"],
+      ["Fail Safe", 1964, "Cold War itself"],
+      ["The Spy Who Came in from the Cold", 1965, "Hans-Dieter Mundt"],
+      ["Torn Curtain", 1966, "Gromek"]
+    ],
+    "Middle East": [
+      ["Lawrence of Arabia", 1962, "Turkish Bey"]
+    ],
+    China: [
+      ["Dr. No", 1962, "Julius No"],
+      ["The Manchurian Candidate", 1962, "Yen Lo"],
+      ["You Only Live Twice", 1967, "SPECTRE (with Asian front)"]
+    ],
+    Japan: [
+      ["Bridge to the Sun", 1961, "Imperial militarism"]
+    ],
+    UK: [
+      ["The Servant", 1963, "Hugo Barrett"],
+      ["The Italian Job", 1969, "Mr. Bridger"]
+    ],
+    "Latin America": [
+      ["Topaz", 1969, "Cuban operatives"],
+      ["The Wild Bunch", 1969, "Gen. Mapache"]
+    ],
+    USA: [
+      ["Psycho", 1960, "Norman Bates"],
+      ["Bonnie and Clyde", 1967, "Bonnie & Clyde"],
+      ["Rosemary's Baby", 1968, "Roman Castevet"],
+      ["The Manchurian Candidate", 1962, "Eleanor Iselin"],
+      ["In Cold Blood", 1967, "Smith & Hickock"],
+      ["Cape Fear", 1962, "Max Cady"]
+    ],
+    Vietnam: [
+      ["The Green Berets", 1968, "Viet Cong"]
+    ],
+    Other: [
+      ["2001: A Space Odyssey", 1968, "HAL 9000"],
+      ["The Birds", 1963, "The birds"],
+      ["Planet of the Apes", 1968, "Dr. Zaius"],
+      ["Night of the Living Dead", 1968, "The zombies"],
+      ["Fantastic Voyage", 1966, "Dr. Michaels"]
+    ]
+  },
+  "1970s": {
+    Germany: [
+      ["Marathon Man", 1976, "Christian Szell"],
+      ["The Boys from Brazil", 1978, "Dr. Josef Mengele"],
+      ["Cabaret", 1972, "The rising Reich"]
+    ],
+    Russia: [
+      ["The Spy Who Loved Me", 1977, "Karl Stromberg"],
+      ["Telefon", 1977, "Nikolai Dalchimsky"],
+      ["Three Days of the Condor", 1975, "CIA / Cold War paranoia"]
+    ],
+    "Middle East": [
+      ["Black Sunday", 1977, "Dahlia Iyad"]
+    ],
+    China: [
+      ["Enter the Dragon", 1973, "Han"]
+    ],
+    UK: [
+      ["A Clockwork Orange", 1971, "Alex DeLarge"]
+    ],
+    "Latin America": [
+      ["The Godfather Part II", 1974, "Hyman Roth + Cuba"],
+      ["Bring Me the Head of Alfredo Garcia", 1974, "El Jefe"]
+    ],
+    USA: [
+      ["The Godfather", 1972, "Vito & Michael Corleone"],
+      ["Dirty Harry", 1971, "Scorpio"],
+      ["Taxi Driver", 1976, "Travis Bickle"],
+      ["Chinatown", 1974, "Noah Cross"],
+      ["Network", 1976, "The networks"],
+      ["All the President's Men", 1976, "The Nixon White House"],
+      ["The Conversation", 1974, "Corporate surveillance"],
+      ["Halloween", 1978, "Michael Myers"],
+      ["Carrie", 1976, "Margaret White"],
+      ["Death Wish", 1974, "NYC criminals"],
+      ["One Flew Over the Cuckoo's Nest", 1975, "Nurse Ratched"],
+      ["The Parallax View", 1974, "The Parallax Corp."]
+    ],
+    Vietnam: [
+      ["Apocalypse Now", 1979, "Col. Kurtz"],
+      ["The Deer Hunter", 1978, "Viet Cong captors"],
+      ["Coming Home", 1978, "The war itself"]
+    ],
+    Other: [
+      ["Jaws", 1975, "The Shark"],
+      ["Star Wars", 1977, "Darth Vader"],
+      ["Alien", 1979, "The Xenomorph"],
+      ["The Exorcist", 1973, "Pazuzu"],
+      ["Westworld", 1973, "The Gunslinger"],
+      ["Logan's Run", 1976, "The central computer"]
+    ]
+  },
+  "1980s": {
+    Germany: [
+      ["Raiders of the Lost Ark", 1981, "Toht / The Nazis"],
+      ["Indiana Jones and the Last Crusade", 1989, "Walter Donovan"],
+      ["Die Hard", 1988, "Hans Gruber"],
+      ["Beverly Hills Cop", 1984, "Victor Maitland"],
+      ["Sophie's Choice", 1982, "The camp"]
+    ],
+    Russia: [
+      ["Rocky IV", 1985, "Ivan Drago"],
+      ["Red Dawn", 1984, "Soviet invaders"],
+      ["Rambo: First Blood Part II", 1985, "Lt. Col. Podovsky"],
+      ["Rambo III", 1988, "Col. Zaysen"],
+      ["Top Gun", 1986, "Soviet MiG pilots"],
+      ["White Nights", 1985, "Col. Chaiko"],
+      ["Firefox", 1982, "Soviet Air Force"],
+      ["Moscow on the Hudson", 1984, "The Soviet state"]
+    ],
+    "Middle East": [
+      ["Back to the Future", 1985, "Libyan terrorists"],
+      ["Iron Eagle", 1986, "Akir Nakesh"]
+    ],
+    China: [
+      ["Big Trouble in Little China", 1986, "Lo Pan"]
+    ],
+    Japan: [
+      ["Black Rain", 1989, "Sato"],
+      ["The Karate Kid Part II", 1986, "Chozen"]
+    ],
+    "Latin America": [
+      ["Scarface", 1983, "Tony Montana / Alejandro Sosa"],
+      ["Commando", 1985, "Arius"],
+      ["Salvador", 1986, "The death squads"],
+      ["Romancing the Stone", 1984, "Colonel Zolo"]
+    ],
+    USA: [
+      ["Wall Street", 1987, "Gordon Gekko"],
+      ["RoboCop", 1987, "Clarence Boddicker / OCP"],
+      ["The Untouchables", 1987, "Al Capone"],
+      ["Fatal Attraction", 1987, "Alex Forrest"],
+      ["Blue Velvet", 1986, "Frank Booth"],
+      ["The Shining", 1980, "Jack Torrance"],
+      ["A Nightmare on Elm Street", 1984, "Freddy Krueger"],
+      ["Batman", 1989, "The Joker"],
+      ["Friday the 13th", 1980, "Mrs. Voorhees"],
+      ["Witness", 1985, "Lt. McFee"]
+    ],
+    Vietnam: [
+      ["Platoon", 1986, "Sgt. Barnes / NVA"],
+      ["Full Metal Jacket", 1987, "The Sniper"],
+      ["Hamburger Hill", 1987, "NVA forces"]
+    ],
+    Other: [
+      ["The Terminator", 1984, "T-800 / Skynet"],
+      ["Aliens", 1986, "The Queen"],
+      ["Predator", 1987, "The Predator"],
+      ["The Thing", 1982, "The Thing"],
+      ["Gremlins", 1984, "Stripe"],
+      ["Ghostbusters", 1984, "Gozer"],
+      ["Beetlejuice", 1988, "Betelgeuse"]
+    ]
+  },
+  "1990s": {
+    Germany: [
+      ["Schindler's List", 1993, "Amon Göth"],
+      ["Saving Private Ryan", 1998, "Steamboat Willie"],
+      ["Die Hard with a Vengeance", 1995, "Simon Gruber"]
+    ],
+    Russia: [
+      ["The Hunt for Red October", 1990, "Capt. Tupolev"],
+      ["GoldenEye", 1995, "Alec Trevelyan"],
+      ["Air Force One", 1997, "Ivan Korshunov"],
+      ["The World Is Not Enough", 1999, "Renard"],
+      ["Crimson Tide", 1995, "Russian ultranationalists"],
+      ["The Saint", 1997, "Ivan Tretiak"]
+    ],
+    "Middle East": [
+      ["True Lies", 1994, "Salim Abu Aziz"],
+      ["Executive Decision", 1996, "Nagi Hassan"],
+      ["The Siege", 1998, "Samir Nazhde"],
+      ["Three Kings", 1999, "Capt. Said"],
+      ["Not Without My Daughter", 1991, "Moody"]
+    ],
+    China: [
+      ["Red Corner", 1997, "Chinese state"]
+    ],
+    Japan: [
+      ["Rising Sun", 1993, "Eddie Sakamura"]
+    ],
+    UK: [
+      ["Mission: Impossible", 1996, "Jim Phelps"],
+      ["Patriot Games", 1992, "Sean Miller"],
+      ["Tomorrow Never Dies", 1997, "Elliot Carver"]
+    ],
+    "Latin America": [
+      ["Clear and Present Danger", 1994, "Felix Cortez"],
+      ["Carlito's Way", 1993, "Benny Blanco"],
+      ["Desperado", 1995, "Bucho"]
+    ],
+    USA: [
+      ["The Silence of the Lambs", 1991, "Hannibal Lecter"],
+      ["Se7en", 1995, "John Doe"],
+      ["Heat", 1995, "Neil McCauley"],
+      ["L.A. Confidential", 1997, "Dudley Smith"],
+      ["Pulp Fiction", 1994, "Marsellus Wallace"],
+      ["Reservoir Dogs", 1992, "Mr. Blonde"],
+      ["The Usual Suspects", 1995, "Keyser Söze"],
+      ["Cape Fear", 1991, "Max Cady"],
+      ["Falling Down", 1993, "William Foster"],
+      ["Natural Born Killers", 1994, "Mickey & Mallory"],
+      ["American History X", 1998, "Derek Vinyard"],
+      ["Fight Club", 1999, "Tyler Durden"],
+      ["The Fugitive", 1993, "Charles Nichols"],
+      ["The Talented Mr. Ripley", 1999, "Tom Ripley"]
+    ],
+    Other: [
+      ["Jurassic Park", 1993, "Dinosaurs / Dennis Nedry"],
+      ["The Matrix", 1999, "Agent Smith"],
+      ["Terminator 2", 1991, "T-1000"],
+      ["Independence Day", 1996, "The Aliens"],
+      ["The Lion King", 1994, "Scar"],
+      ["Aladdin", 1992, "Jafar"],
+      ["The Phantom Menace", 1999, "Darth Maul"],
+      ["Armageddon", 1998, "The Asteroid"]
+    ]
+  },
+  "2000s": {
+    Germany: [
+      ["Inglourious Basterds", 2009, "Hans Landa"],
+      ["Valkyrie", 2008, "Hitler"]
+    ],
+    Russia: [
+      ["The Bourne Supremacy", 2004, "Kirill / Yuri Gretkov"],
+      ["Eastern Promises", 2007, "Semyon"],
+      ["Lord of War", 2005, "Andre Baptiste / arms trade"],
+      ["We Own the Night", 2007, "Vadim Nezhinski"]
+    ],
+    "Middle East": [
+      ["The Kingdom", 2007, "Abu Hamza"],
+      ["Body of Lies", 2008, "Al-Saleem"],
+      ["Munich", 2005, "Black September"],
+      ["Syriana", 2005, "Oil power brokers"],
+      ["Iron Man", 2008, "The Ten Rings"],
+      ["300", 2006, "Xerxes"],
+      ["The Hurt Locker", 2008, "Iraqi insurgents"],
+      ["Black Hawk Down", 2001, "Aidid militia"],
+      ["Rendition", 2007, "North African terror"]
+    ],
+    "North Korea": [
+      ["Die Another Day", 2002, "Col. Tan-Sun Moon / Graves"]
+    ],
+    China: [
+      ["The Forbidden Kingdom", 2008, "The Jade Warlord"]
+    ],
+    UK: [
+      ["Layer Cake", 2004, "Eddie Temple"],
+      ["Mission: Impossible 2", 2000, "Sean Ambrose"]
+    ],
+    "Latin America": [
+      ["Traffic", 2000, "Tijuana Cartel"],
+      ["Miami Vice", 2006, "Arcángel de Jesús Montoya"]
+    ],
+    USA: [
+      ["The Dark Knight", 2008, "The Joker"],
+      ["The Departed", 2006, "Frank Costello"],
+      ["There Will Be Blood", 2007, "Daniel Plainview"],
+      ["No Country for Old Men", 2007, "Anton Chigurh"],
+      ["American Psycho", 2000, "Patrick Bateman"],
+      ["Spider-Man", 2002, "Green Goblin"],
+      ["Spider-Man 2", 2004, "Doc Ock"],
+      ["Gangs of New York", 2002, "Bill the Butcher"],
+      ["Mystic River", 2003, "A neighborhood's silence"],
+      ["Mulholland Drive", 2001, "Hollywood itself"]
+    ],
+    Other: [
+      ["The Lord of the Rings", 2001, "Sauron / Saruman"],
+      ["Casino Royale", 2006, "Le Chiffre"],
+      ["War of the Worlds", 2005, "The Tripods"],
+      ["I Am Legend", 2007, "The Darkseekers"],
+      ["Cloverfield", 2008, "The Monster"]
+    ]
+  },
+  "2010s": {
+    Germany: [
+      ["The Monuments Men", 2014, "Nazi looters"]
+    ],
+    Russia: [
+      ["Salt", 2010, "Orlov / Russian sleepers"],
+      ["Jack Ryan: Shadow Recruit", 2014, "Viktor Cherevin"],
+      ["A Good Day to Die Hard", 2013, "Yuri Komarov"],
+      ["Iron Man 2", 2010, "Ivan Vanko"],
+      ["The Equalizer", 2014, "Teddy / Russian mob"],
+      ["John Wick", 2014, "Viggo Tarasov"],
+      ["Atomic Blonde", 2017, "Bremovych"],
+      ["Bridge of Spies", 2015, "KGB"],
+      ["Red Sparrow", 2018, "Russian intelligence"],
+      ["Tinker Tailor Soldier Spy", 2011, "Karla's mole"]
+    ],
+    "Middle East": [
+      ["Zero Dark Thirty", 2012, "Bin Laden / Al-Qaeda"],
+      ["American Sniper", 2014, "Mustafa"],
+      ["Argo", 2012, "Revolutionary Guard"],
+      ["13 Hours", 2016, "Benghazi militants"],
+      ["Lone Survivor", 2013, "Taliban"]
+    ],
+    "North Korea": [
+      ["Olympus Has Fallen", 2013, "Kang"],
+      ["The Interview", 2014, "Kim Jong-un"],
+      ["Red Dawn", 2012, "North Korean invasion"]
+    ],
+    China: [
+      ["Skyscraper", 2018, "Kores Botha"],
+      ["The Great Wall", 2016, "The Tao Tei"]
+    ],
+    Japan: [
+      ["The Wolverine", 2013, "Shingen / Silver Samurai"]
+    ],
+    UK: [
+      ["Skyfall", 2012, "Raoul Silva"],
+      ["Mission: Impossible – Rogue Nation", 2015, "Solomon Lane"],
+      ["Mission: Impossible – Fallout", 2018, "Solomon Lane / Walker"],
+      ["Spectre", 2015, "Blofeld"]
+    ],
+    "Latin America": [
+      ["Sicario", 2015, "Alejandro / Medellín cartel"],
+      ["Sicario: Day of the Soldado", 2018, "Reyes cartel"]
+    ],
+    USA: [
+      ["The Wolf of Wall Street", 2013, "Jordan Belfort"],
+      ["The Social Network", 2010, "Mark Zuckerberg"],
+      ["Gone Girl", 2014, "Amy Dunne"],
+      ["Get Out", 2017, "The Armitages"],
+      ["Joker", 2019, "Arthur Fleck"],
+      ["Black Panther", 2018, "Killmonger"],
+      ["Django Unchained", 2012, "Calvin Candie"],
+      ["12 Years a Slave", 2013, "Edwin Epps"],
+      ["The Hateful Eight", 2015, "All of them"],
+      ["Once Upon a Time in Hollywood", 2019, "The Manson Family"],
+      ["Knives Out", 2019, "Ransom Drysdale"],
+      ["Nightcrawler", 2014, "Louis Bloom"],
+      ["Whiplash", 2014, "Terence Fletcher"],
+      ["Three Billboards", 2017, "Officer Dixon"]
+    ],
+    Other: [
+      ["Mad Max: Fury Road", 2015, "Immortan Joe"],
+      ["The Force Awakens", 2015, "Kylo Ren / First Order"],
+      ["Avengers: Infinity War", 2018, "Thanos"],
+      ["Captain America: Civil War", 2016, "Zemo"],
+      ["Wonder Woman", 2017, "Ares"],
+      ["It", 2017, "Pennywise"],
+      ["A Quiet Place", 2018, "The Creatures"]
+    ]
+  },
+  "2020s": {
+    Germany: [
+      ["Oppenheimer", 2023, "Hitler (off-screen)"]
+    ],
+    Russia: [
+      ["No Time to Die", 2021, "Lyutsifer Safin"],
+      ["Tenet", 2020, "Andrei Sator"],
+      ["Black Widow", 2021, "Dreykov / Red Room"],
+      ["Bullet Train", 2022, "The White Death"],
+      ["Extraction 2", 2023, "Zurab Radiani"],
+      ["Heart of Stone", 2023, "Parker / The Charter"]
+    ],
+    "Middle East": [
+      ["Top Gun: Maverick", 2022, "Unnamed rogue state"]
+    ],
+    China: [
+      ["Shang-Chi", 2021, "Wenwu / The Mandarin"]
+    ],
+    UK: [
+      ["Argylle", 2024, "The Division"]
+    ],
+    "Latin America": [
+      ["Hold the Dark", 2018, "(skipped)"]
+    ],
+    USA: [
+      ["Glass Onion", 2022, "Miles Bron"],
+      ["Don't Look Up", 2021, "President Orlean"],
+      ["Promising Young Woman", 2020, "Al Monroe"],
+      ["The Batman", 2022, "The Riddler"],
+      ["Joker: Folie à Deux", 2024, "Arthur Fleck"],
+      ["Civil War", 2024, "The President"],
+      ["Killers of the Flower Moon", 2023, "William Hale"],
+      ["Nightmare Alley", 2021, "Stanton Carlisle"],
+      ["The Gray Man", 2022, "Lloyd Hansen"],
+      ["Saltburn", 2023, "Oliver Quick"],
+      ["May December", 2023, "Gracie Atherton-Yoo"],
+      ["Babylon", 2022, "The machine of Hollywood"]
+    ],
+    Other: [
+      ["Dune", 2021, "Baron Harkonnen"],
+      ["Spider-Man: No Way Home", 2021, "Multiverse villains"],
+      ["Wakanda Forever", 2022, "Namor"],
+      ["Mission: Impossible – Dead Reckoning", 2023, "The Entity (AI)"],
+      ["Leave the World Behind", 2023, "Unknown actors"],
+      ["Nope", 2022, "Jean Jacket"]
+    ]
+  }
+};
+
+// Strip stray entries (e.g. Latin America 2020s)
+delete films["2020s"]["Latin America"];
+
+const keys = ["Germany", "Russia", "Middle East", "North Korea", "China", "Japan", "UK", "Latin America", "USA", "Vietnam", "Other"];
+
+const fullNames = {
+  "Germany":       "Germany",
+  "Russia":        "Russia / USSR",
+  "Middle East":   "Middle East",
+  "North Korea":   "North Korea",
+  "China":         "China",
+  "Japan":         "Japan",
+  "UK":            "United Kingdom",
+  "Latin America": "Latin America",
+  "USA":           "USA (Domestic)",
+  "Vietnam":       "Vietnam",
+  "Other":         "Non-national"
+};
+
+const colorStops = {
+  "Germany":       ["#4a0c0c", "#a52a2a"],
+  "Russia":        ["#7a0d18", "#e63946"],
+  "Middle East":   ["#8a6510", "#e9c46a"],
+  "North Korea":   ["#1f2e15", "#5b7c3a"],
+  "China":         ["#5a160a", "#c8553d"],
+  "Japan":         ["#9c5520", "#f4a261"],
+  "UK":            ["#15314a", "#3e6691"],
+  "Latin America": ["#1e5a3c", "#52b788"],
+  "USA":           ["#27425b", "#7da4c8"],
+  "Vietnam":       ["#2c331a", "#7d8a47"],
+  "Other":         ["#3d165c", "#a064e0"]
+};
+const colors = Object.fromEntries(Object.entries(colorStops).map(([k, [, b]]) => [k, b]));
+
+const events = [
+  { year: 1945, label: "End of WWII" },
+  { year: 1962, label: "Cuban Missile Crisis" },
+  { year: 1975, label: "Fall of Saigon" },
+  { year: 1989, label: "Berlin Wall falls" },
+  { year: 2001, label: "9/11" },
+  { year: 2014, label: "Crimea annexed" },
+  { year: 2022, label: "Ukraine invasion" }
+];
+
+const eraBands = [
+  { x0: 1940, x1: 1948, label: "WORLD WAR II" },
+  { x0: 1948, x1: 1991, label: "COLD WAR" },
+  { x0: 1991, x1: 2001, label: "UNIPOLAR DECADE" },
+  { x0: 2001, x1: 2014, label: "WAR ON TERROR" },
+  { x0: 2014, x1: 2025, label: "MULTIPOLAR RETURN" }
+];
+
+// ============================================================
+// Derive aggregate counts from films
+// ============================================================
+const data = decades.map(d => {
+  const row = { decade: d.year, _id: d.id };
+  keys.forEach(k => {
+    row[k] = (films[d.id] && films[d.id][k]) ? films[d.id][k].length : 0;
+  });
+  return row;
+});
+
+// ============================================================
+// CHART
+// ============================================================
+const svg = d3.select("#chart");
+const W = 1440, H = 640;
+const margin = { top: 60, right: 60, bottom: 70, left: 60 };
+const innerW = W - margin.left - margin.right;
+const innerH = H - margin.top - margin.bottom;
+
+// SVG defs: gradients per country, glow filter
+const defs = svg.append("defs");
+
+// vertical gradient for each country (top: bright, bottom: dark)
+Object.entries(colorStops).forEach(([k, [dark, bright]]) => {
+  const id = `grad-${k.replace(/\s+/g, "-")}`;
+  const grad = defs.append("linearGradient")
+    .attr("id", id)
+    .attr("x1", "0%").attr("y1", "0%")
+    .attr("x2", "0%").attr("y2", "100%");
+  grad.append("stop").attr("offset", "0%").attr("stop-color", bright);
+  grad.append("stop").attr("offset", "60%").attr("stop-color", d3.interpolateRgb(bright, dark)(0.4));
+  grad.append("stop").attr("offset", "100%").attr("stop-color", dark);
+});
+
+// soft glow filter
+const glow = defs.append("filter")
+  .attr("id", "glow")
+  .attr("x", "-20%").attr("y", "-20%")
+  .attr("width", "140%").attr("height", "140%");
+glow.append("feGaussianBlur").attr("stdDeviation", "4").attr("result", "blur");
+const merge = glow.append("feMerge");
+merge.append("feMergeNode").attr("in", "blur");
+merge.append("feMergeNode").attr("in", "SourceGraphic");
+
+// film grain texture for the streams
+const grain = defs.append("filter").attr("id", "grain");
+grain.append("feTurbulence")
+  .attr("type", "fractalNoise")
+  .attr("baseFrequency", "0.9")
+  .attr("numOctaves", "2")
+  .attr("result", "noise");
+grain.append("feColorMatrix")
+  .attr("in", "noise")
+  .attr("values", "0 0 0 0 0   0 0 0 0 0   0 0 0 0 0   0 0 0 0.18 0")
+  .attr("result", "noiseAlpha");
+grain.append("feComposite")
+  .attr("in", "noiseAlpha")
+  .attr("in2", "SourceGraphic")
+  .attr("operator", "in")
+  .attr("result", "noiseInside");
+const grainMerge = grain.append("feMerge");
+grainMerge.append("feMergeNode").attr("in", "SourceGraphic");
+grainMerge.append("feMergeNode").attr("in", "noiseInside");
+
+const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+// ============================================================
+// SCALES + STACK
+// ============================================================
+const customOrder = ["Other", "Vietnam", "Latin America", "Japan", "China", "North Korea", "USA", "UK", "Middle East", "Germany", "Russia"];
+const orderIdx = customOrder.map(k => keys.indexOf(k));
+
+const stack = d3.stack()
+  .keys(keys)
+  .offset(d3.stackOffsetWiggle)
+  .order(() => orderIdx);
+
+const series = stack(data);
+
+const xScale = d3.scaleLinear()
+  .domain([1942, 2024])
+  .range([20, innerW - 20]);
+
+const yMin = d3.min(series, l => d3.min(l, d => d[0]));
+const yMax = d3.max(series, l => d3.max(l, d => d[1]));
+const yScale = d3.scaleLinear()
+  .domain([yMin, yMax])
+  .range([innerH - 30, 30]);
+
+const area = d3.area()
+  .x(d => xScale(d.data.decade))
+  .y0(d => yScale(d[0]))
+  .y1(d => yScale(d[1]))
+  .curve(d3.curveBasis);
+
+// ============================================================
+// ERA BANDS along top
+// ============================================================
+const eraG = g.append("g").attr("class", "eras");
+eraBands.forEach(e => {
+  const x0 = xScale(Math.max(e.x0, 1942));
+  const x1 = xScale(Math.min(e.x1, 2024));
+  const cx = (x0 + x1) / 2;
+  eraG.append("line")
+    .attr("class", "era-rule")
+    .attr("x1", x0 + 4).attr("x2", cx - e.label.length * 4)
+    .attr("y1", -34).attr("y2", -34);
+  eraG.append("line")
+    .attr("class", "era-rule")
+    .attr("x1", cx + e.label.length * 4).attr("x2", x1 - 4)
+    .attr("y1", -34).attr("y2", -34);
+  eraG.append("text")
+    .attr("class", "era-band")
+    .attr("x", cx).attr("y", -30)
+    .attr("text-anchor", "middle")
+    .text(e.label);
+});
+
+// ============================================================
+// EVENT ANNOTATIONS
+// ============================================================
+const eventG = g.append("g").attr("class", "events");
+events.forEach(ev => {
+  if (ev.year < 1942 || ev.year > 2024) return;
+  const x = xScale(ev.year);
+  eventG.append("line")
+    .attr("class", "event-line")
+    .attr("x1", x).attr("x2", x)
+    .attr("y1", -10).attr("y2", innerH);
+  const t = eventG.append("text")
+    .attr("class", "event-label")
+    .attr("x", x).attr("y", -14)
+    .attr("text-anchor", "middle");
+  t.append("tspan").attr("class", "year").text(ev.year);
+  t.append("tspan").attr("dx", 6).text(ev.label);
+});
+
+// ============================================================
+// STREAMS
+// ============================================================
+const layers = g.selectAll(".layer")
+  .data(series)
+  .enter().append("path")
+    .attr("class", d => `layer layer-${cssKey(d.key)}`)
+    .attr("data-key", d => d.key)
+    .attr("d", area)
+    .style("fill", d => `url(#grad-${cssKey(d.key)})`)
+    .style("opacity", 0);
+
+layers.transition()
+  .duration(900)
+  .delay((d, i) => i * 50)
+  .style("opacity", 1);
+
+// stream labels
+const lightFills = new Set(["Middle East", "Japan"]);
+series.forEach(layer => {
+  let bestI = 0, bestW = 0;
+  layer.forEach((pt, i) => {
+    const w = pt[1] - pt[0];
+    if (w > bestW) { bestW = w; bestI = i; }
+  });
+  if (bestW < 1.6) return;
+  const pt = layer[bestI];
+  const cx = xScale(pt.data.decade);
+  const cy = yScale((pt[0] + pt[1]) / 2);
+  const fontSize = Math.max(11, Math.min(22, bestW * 2.2));
+  let label = layer.key.toUpperCase();
+  if (layer.key === "Russia") label = "RUSSIA / USSR";
+  if (layer.key === "USA") label = "USA (DOMESTIC)";
+  if (layer.key === "Other") label = "NON-NATIONAL";
+  g.append("text")
+    .attr("class", "stream-label" + (lightFills.has(layer.key) ? " dark" : ""))
+    .attr("x", cx).attr("y", cy)
+    .attr("text-anchor", "middle")
+    .attr("dominant-baseline", "middle")
+    .style("font-size", fontSize + "px")
+    .style("opacity", 0)
+    .text(label)
+    .transition().delay(1100).duration(600)
+    .style("opacity", 1);
+});
+
+// ============================================================
+// DECADE AXIS
+// ============================================================
+g.append("line")
+  .attr("class", "axis-line")
+  .attr("x1", 0).attr("x2", innerW)
+  .attr("y1", innerH + 14).attr("y2", innerH + 14);
+
+const decadeG = g.selectAll(".decade-group")
+  .data(decades).enter().append("g")
+    .attr("class", "decade-group")
+    .attr("transform", d => `translate(${xScale(d.year)},0)`);
+
+decadeG.append("line")
+  .attr("class", "axis-line")
+  .attr("y1", innerH + 12).attr("y2", innerH + 18);
+
+decadeG.append("text")
+  .attr("class", "decade-tick")
+  .attr("data-decade", d => d.id)
+  .attr("y", innerH + 34)
+  .attr("text-anchor", "middle")
+  .text(d => d.label)
+  .on("click", (e, d) => setSelection({ decade: d.id, country: null }));
+
+decadeG.append("text")
+  .attr("class", "decade-count")
+  .attr("y", innerH + 50)
+  .attr("text-anchor", "middle")
+  .text(d => "n=" + d3.sum(keys, k => data.find(r => r._id === d.id)[k]));
+
+// ============================================================
+// PLAYHEAD
+// ============================================================
+const playheadG = g.append("g").attr("class", "playhead-g").style("pointer-events", "none");
+const playheadLine = playheadG.append("line")
+  .attr("class", "playhead-line")
+  .attr("y1", -10).attr("y2", innerH + 18);
+const playheadLabel = playheadG.append("text")
+  .attr("class", "playhead-label")
+  .attr("text-anchor", "middle")
+  .attr("y", -42);
+
+function nearestDecadeForX(mx) {
+  let nearest = decades[0], best = Infinity;
+  decades.forEach(d => {
+    const dist = Math.abs(xScale(d.year) - mx);
+    if (dist < best) { best = dist; nearest = d; }
+  });
+  return nearest;
+}
+
+// ============================================================
+// SELECTION STATE
+// ============================================================
+let locked = { decade: null, country: null };
+let hoverDecade = null;
+const chartWrap = document.getElementById("chart-wrap");
+
+function setHover(decadeId) {
+  hoverDecade = decadeId;
+  if (decadeId) {
+    const dec = decades.find(d => d.id === decadeId);
+    const x = xScale(dec.year);
+    playheadLine.attr("x1", x).attr("x2", x).style("opacity", 0.85);
+    playheadLabel.attr("x", x).text(dec.label).style("opacity", 1);
+    d3.selectAll(".decade-tick").classed("active", d => d.id === decadeId);
+  } else {
+    playheadLine.style("opacity", 0);
+    playheadLabel.style("opacity", 0);
+    d3.selectAll(".decade-tick").classed("active", false);
+  }
+  renderPanel();
+}
+
+function setSelection({ decade, country }) {
+  if (locked.decade === decade && locked.country === country) {
+    // click again to unlock
+    locked = { decade: null, country: null };
+  } else {
+    locked = { decade, country };
+  }
+  applyLockedHighlight();
+  hoverDecade = locked.decade;
+  if (locked.decade) {
+    const dec = decades.find(d => d.id === locked.decade);
+    const x = xScale(dec.year);
+    playheadLine.attr("x1", x).attr("x2", x).style("opacity", 1);
+    playheadLabel.attr("x", x).text(dec.label).style("opacity", 1);
+    d3.selectAll(".decade-tick").classed("active", d => d.id === locked.decade);
+  } else {
+    setHover(null);
+  }
+  document.getElementById("clear-btn").classList.toggle("visible", !!(locked.decade || locked.country));
+  d3.selectAll(".pill").classed("active", function() {
+    return this.dataset.decade === locked.decade;
+  });
+  renderPanel();
+}
+
+function applyLockedHighlight() {
+  if (locked.country) {
+    chartWrap.classList.add("has-locked");
+    d3.selectAll(".layer").classed("locked", function() {
+      return this.dataset.key === locked.country;
+    });
+  } else {
+    chartWrap.classList.remove("has-locked");
+    d3.selectAll(".layer").classed("locked", false);
+  }
+}
+
+// stream interactions — also drive the playhead
+layers
+  .on("mousemove", function(event, d) {
+    if (locked.country) return;
+    const [mx] = d3.pointer(event, g.node());
+    setHover(nearestDecadeForX(mx).id);
+    chartWrap.classList.add("hovering");
+    d3.selectAll(".layer").classed("active", false);
+    d3.select(this).classed("active", true);
+  })
+  .on("mouseleave", function() {
+    if (locked.country) return;
+    chartWrap.classList.remove("hovering");
+    d3.selectAll(".layer").classed("active", false);
+    if (!locked.decade) setHover(null);
+  })
+  .on("click", function(event, d) {
+    event.stopPropagation();
+    const [mx] = d3.pointer(event, g.node());
+    const decId = nearestDecadeForX(mx).id;
+    setSelection({ decade: decId, country: d.key });
+  });
+
+// ============================================================
+// CONTROLS — decade pills
+// ============================================================
+const pillBar = d3.select("#decade-pills");
+decades.forEach(d => {
+  pillBar.append("button")
+    .attr("class", "pill")
+    .attr("data-decade", d.id)
+    .text(d.label)
+    .on("click", () => setSelection({ decade: d.id, country: locked.country }));
+});
+
+document.getElementById("clear-btn").addEventListener("click", () => {
+  setSelection({ decade: null, country: null });
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") setSelection({ decade: null, country: null });
+});
+
+// ============================================================
+// DETAIL PANEL RENDER
+// ============================================================
+const panelEl = document.getElementById("panel");
+
+function renderPanel() {
+  const decId = locked.decade || hoverDecade;
+  const countryKey = locked.country;
+
+  if (!decId && !countryKey) {
+    panelEl.innerHTML = `
+      <div class="panel-header">
+        <div class="panel-title">The <span class="accent">dataset</span></div>
+        <div class="panel-sub">~280 films · 11 origins · 9 decades</div>
+      </div>
+      <div class="panel-deck">
+        Hover or click the streamgraph above to inspect any decade or country.
+        Each ribbon's thickness is the number of iconic films from that origin in our sample.
+      </div>
+      <div class="empty-state">→ &nbsp; Move your cursor across the chart to begin.</div>`;
+    return;
+  }
+
+  if (countryKey && decId) {
+    // country in a specific decade
+    renderCellPanel(decId, countryKey);
+  } else if (countryKey) {
+    renderCountryPanel(countryKey);
+  } else {
+    renderDecadePanel(decId);
+  }
+}
+
+function renderDecadePanel(decId) {
+  const dec = decades.find(d => d.id === decId);
+  const cellMap = films[decId] || {};
+  const total = d3.sum(keys, k => (cellMap[k] || []).length);
+  const presentKeys = keys.filter(k => (cellMap[k] || []).length > 0);
+  // sort by descending count
+  presentKeys.sort((a, b) => (cellMap[b].length - cellMap[a].length));
+
+  panelEl.innerHTML = `
+    <div class="panel-header">
+      <div class="panel-title">${dec.label}<span class="accent"> · </span>${dec.era}</div>
+      <div class="panel-sub">${total} films · ${presentKeys.length} origins</div>
+    </div>
+    <div class="panel-deck">${dec.deck}</div>
+    <div class="country-grid">
+      ${presentKeys.map(k => countryCardHTML(k, cellMap[k])).join("")}
+    </div>`;
+  attachCountryCardClicks(decId);
+}
+
+function renderCellPanel(decId, k) {
+  const dec = decades.find(d => d.id === decId);
+  const cellMap = films[decId] || {};
+  const list = cellMap[k] || [];
+  panelEl.innerHTML = `
+    <div class="panel-header">
+      <div class="panel-title">${fullNames[k]}<span class="accent"> · </span>${dec.label}</div>
+      <div class="panel-sub">${list.length} films · ${dec.era}</div>
+    </div>
+    <div class="panel-deck">${dec.deck}</div>
+    <div class="country-grid">
+      ${list.length ? countryCardHTML(k, list) : `<div class="empty-state">No films sampled in this cell.</div>`}
+    </div>`;
+}
+
+function renderCountryPanel(k) {
+  const totalCount = d3.sum(decades, d => (films[d.id]?.[k] || []).length);
+  panelEl.innerHTML = `
+    <div class="panel-header">
+      <div class="panel-title">${fullNames[k]}<span class="accent"> · </span>across decades</div>
+      <div class="panel-sub">${totalCount} films · 1940s–2020s</div>
+    </div>
+    <div class="panel-deck">Every sampled Hollywood film where the primary antagonist's origin reads as ${fullNames[k]}.</div>
+    <div class="timeline-grid">
+      ${decades.map(d => {
+        const list = films[d.id]?.[k] || [];
+        if (!list.length) return "";
+        return `
+          <div class="timeline-decade-card">
+            <div class="decade-name">${d.label}<span style="opacity:0.5"> · ${list.length}</span></div>
+            <ul class="film-list">
+              ${list.map(f => filmItemHTML(f)).join("")}
+            </ul>
+          </div>`;
+      }).join("")}
+    </div>`;
+}
+
+function countryCardHTML(k, list) {
+  return `
+    <div class="country-card" style="--c-color:${colors[k]}" data-country="${k}">
+      <div class="name-row">
+        <div class="name">${fullNames[k]}</div>
+        <div class="count">${list.length}</div>
+      </div>
+      <ul class="film-list">
+        ${list.map(f => filmItemHTML(f)).join("")}
+      </ul>
+    </div>`;
+}
+function filmItemHTML(f) {
+  const [title, year, villain] = f;
+  return `
+    <li class="film-item">
+      <div class="year">${year}</div>
+      <div class="meta">
+        <div class="title">${escapeHtml(title)}</div>
+        <div class="villain">${escapeHtml(villain)}</div>
+      </div>
+    </li>`;
+}
+function attachCountryCardClicks(decId) {
+  panelEl.querySelectorAll(".country-card").forEach(card => {
+    card.style.cursor = "pointer";
+    card.addEventListener("click", () => {
+      setSelection({ decade: decId, country: card.dataset.country });
+    });
+  });
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+}
+function cssKey(k) { return k.replace(/\s+/g, "-"); }
+
+// initial render
+renderPanel();
+</script>
+</body>
+</html>
