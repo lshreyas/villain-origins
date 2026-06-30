@@ -27,7 +27,7 @@ Five exhibits, in this order:
 
 | # | Section | What it does |
 |---|---------|--------------|
-| I | **Overview** | Streamgraph of all 11 origins by decade; ribbons stack with `d3.stackOffsetWiggle`. Hover or click streams (and decade pills below) to drill into a panel that lists every film behind that ribbon. ESC clears. |
+| I | **Overview** | Streamgraph of all 11 origins by decade; ribbons stack with `d3.stackOffsetWiggle`. Hover or click streams (and decade pills below) to drill into a panel that lists every film behind that ribbon. ESC clears. A **USA · DOMESTIC** toggle in the control bar redacts the US ribbon — re-stacks live with a keyed D3 join. |
 | II | **The dataset** | Constellation — one dot per film on a year × country grid, jittered for stacked years. Hover any dot for film + villain + origin. |
 | III | **World map** | Natural-Earth choropleth. Decade pills + "All time" pill at top (defaults to All time). Color scale adapts to the current view's max. Hover any shaded country for that decade's films. |
 | IV | **By country** | Small-multiples sparkline per origin, area+line, sorted by lifetime total. Each peak decade marked with a labeled ring. |
@@ -57,7 +57,7 @@ Eight numbered sections:
 
 From `dataset.html` Section 06:
 
-1. **Should we drop US villains?** They're currently in (~17% of sample, 88 films). Strongest argument for cutting: the dossier is fundamentally about Hollywood's view of the foreign Other. Strongest argument for keeping: dropping them would erase the most interesting finding — that America's loudest screen enemy has been America since the 1970s. The pragmatic move is a toggle on the streamgraph that lets the reader hide US villains; not implemented yet.
+1. **Should we drop US villains?** They're currently in (~17% of sample, 88 films). Strongest argument for cutting: the dossier is fundamentally about Hollywood's view of the foreign Other. Strongest argument for keeping: dropping them would erase the most interesting finding — that America's loudest screen enemy has been America since the 1970s. Compromise shipped: the USA · DOMESTIC toggle on Exhibit I lets the reader redact US villains and watch the streamgraph re-stack; the panel and decade `n=` counts update with it.
 2. **How do we determine what's in the dataset?** No objective rule. The honest description is "films a reasonably well-read viewer can name."
 3. **Why is China underrepresented?** Exhibit V argues it's box-office dependence. Could be partly sample bias too.
 
@@ -119,4 +119,4 @@ Commits should be `Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>` when
 
 ## Last touched
 
-2026-06-23
+2026-06-29

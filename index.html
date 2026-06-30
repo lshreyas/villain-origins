@@ -344,6 +344,27 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 }
 .clear-btn:hover, .clear-btn.visible { color: var(--alert); border-color: var(--alert); }
 
+.us-toggle-wrap { display: flex; align-items: center; gap: 8px; }
+.us-toggle-wrap .control-label { margin-right: 0; }
+.us-toggle {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; letter-spacing: 0.2em; font-weight: 600;
+  padding: 7px 14px;
+  min-width: 104px; text-align: center;
+  border: 1px solid var(--alert);
+  background: var(--alert); color: var(--paper);
+  cursor: pointer; transition: all 0.18s;
+  text-transform: uppercase;
+}
+.us-toggle:hover { background: var(--alert-deep); border-color: var(--alert-deep); }
+.us-toggle:not(.active) {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+  letter-spacing: 0.24em;
+}
+.us-toggle:not(.active):hover { background: var(--ink-soft); border-color: var(--ink-soft); }
+
 .panel {
   background: rgba(184, 166, 121, 0.2);
   border: 1px solid var(--ink-soft);
@@ -825,6 +846,10 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
     <div class="decade-pills" id="decade-pills">
       <span class="control-label">DECADE</span>
     </div>
+    <div class="us-toggle-wrap">
+      <span class="control-label">USA · DOMESTIC</span>
+      <button class="us-toggle active" id="us-toggle" aria-pressed="true">INCLUDED</button>
+    </div>
     <button class="clear-btn" id="clear-btn">Reset · ESC</button>
   </div>
 
@@ -954,7 +979,11 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 // Shared data lives in films.js: decades, keys, fullNames, colors,
 // films, events, eraBands, isoToCategory, industryContext.
 
-// Aggregate decade × category counts for the streamgraph
+const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+const cssKey = k => k.replace(/\s+/g, "-");
+
+// Decade × origin counts — used by Exhibit IV sparklines.
+// (Exhibit I's streamgraph computes its own copy so it can respect the US-toggle.)
 const data = decades.map(d => {
   const row = { decade: d.year, _id: d.id };
   keys.forEach(k => {
@@ -962,9 +991,6 @@ const data = decades.map(d => {
   });
   return row;
 });
-
-const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
-const cssKey = k => k.replace(/\s+/g, "-");
 
 // ============================================================
 // EXHIBIT A · STREAMGRAPH
@@ -977,22 +1003,22 @@ const cssKey = k => k.replace(/\s+/g, "-");
   const innerH = H - margin.top - margin.bottom;
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
-  const customOrder = ["Other", "Vietnam", "Latin America", "Japan", "China", "North Korea", "USA", "UK", "Middle East", "Germany", "Russia"];
-  const orderIdx = customOrder.map(k => keys.indexOf(k));
-
-  const stack = d3.stack().keys(keys).offset(d3.stackOffsetWiggle).order(() => orderIdx);
-  const series = stack(data);
+  let includeUS = true;
+  const customOrderFull = ["Other", "Vietnam", "Latin America", "Japan", "China", "North Korea", "USA", "UK", "Middle East", "Germany", "Russia"];
+  function activeKeys(){ return includeUS ? keys : keys.filter(k => k !== "USA"); }
+  function computeData(){
+    const ak = activeKeys();
+    return decades.map(d => {
+      const row = { decade: d.year, _id: d.id };
+      ak.forEach(k => {
+        row[k] = (films[d.id] && films[d.id][k]) ? films[d.id][k].length : 0;
+      });
+      return row;
+    });
+  }
 
   const xScale = d3.scaleLinear().domain([1942, 2024]).range([20, innerW - 20]);
-  const yMin = d3.min(series, l => d3.min(l, d => d[0]));
-  const yMax = d3.max(series, l => d3.max(l, d => d[1]));
-  const yScale = d3.scaleLinear().domain([yMin, yMax]).range([innerH - 30, 30]);
-
-  const area = d3.area()
-    .x(d => xScale(d.data.decade))
-    .y0(d => yScale(d[0]))
-    .y1(d => yScale(d[1]))
-    .curve(d3.curveBasis);
+  const yScale = d3.scaleLinear().range([innerH - 30, 30]);
 
   // era bands top
   const eraG = g.append("g");
@@ -1025,39 +1051,9 @@ const cssKey = k => k.replace(/\s+/g, "-");
     t.append("tspan").attr("dx", 6).text(ev.label);
   });
 
-  // streams
-  const layers = g.selectAll(".layer").data(series).enter().append("path")
-    .attr("class", d => `layer layer-${cssKey(d.key)}`)
-    .attr("data-key", d => d.key)
-    .attr("d", area)
-    .style("fill", d => colors[d.key])
-    .style("opacity", 0);
-
-  layers.transition().duration(900).delay((d,i) => i * 50).style("opacity", 1);
-
-  // stream labels
-  const lightFills = new Set(["Middle East", "Japan", "Latin America"]);
-  series.forEach(layer => {
-    let bestI = 0, bestW = 0;
-    layer.forEach((pt, i) => { const w = pt[1] - pt[0]; if (w > bestW) { bestW = w; bestI = i; } });
-    if (bestW < 1.6) return;
-    const pt = layer[bestI];
-    const cx = xScale(pt.data.decade);
-    const cy = yScale((pt[0] + pt[1]) / 2);
-    const fontSize = Math.max(11, Math.min(20, bestW * 2.0));
-    let label = layer.key.toUpperCase();
-    if (layer.key === "Russia") label = "RUSSIA / USSR";
-    if (layer.key === "USA") label = "USA · DOMESTIC";
-    if (layer.key === "Other") label = "NON-NATIONAL";
-    g.append("text")
-      .attr("class","stream-label" + (lightFills.has(layer.key) ? " dark" : ""))
-      .attr("x", cx).attr("y", cy)
-      .attr("text-anchor","middle").attr("dominant-baseline","middle")
-      .style("font-size", fontSize + "px")
-      .style("opacity", 0)
-      .text(label)
-      .transition().delay(1100).duration(600).style("opacity", 1);
-  });
+  // stream containers — paths + labels rendered by renderStreams() below
+  const layersG = g.append("g");
+  const labelsG = g.append("g");
 
   // axis + decade ticks
   g.append("line").attr("class","axis-line")
@@ -1072,8 +1068,7 @@ const cssKey = k => k.replace(/\s+/g, "-");
     .text(d => d.label)
     .on("click", (e,d) => setSelection({ decade: d.id, country: null }));
   decadeG.append("text").attr("class","decade-count")
-    .attr("y", innerH + 50).attr("text-anchor","middle")
-    .text(d => "n=" + d3.sum(keys, k => data.find(r => r._id === d.id)[k]));
+    .attr("y", innerH + 50).attr("text-anchor","middle");
 
   // playhead
   const playheadG = g.append("g").style("pointer-events","none");
@@ -1140,26 +1135,117 @@ const cssKey = k => k.replace(/\s+/g, "-");
       d3.selectAll(".layer").classed("locked", false);
     }
   }
-  layers
-    .on("mousemove", function(event,d){
-      if (locked.country) return;
-      const [mx] = d3.pointer(event, g.node());
-      setHover(nearestDecadeForX(mx).id);
-      chartWrap.classList.add("hovering");
-      d3.selectAll(".layer").classed("active", false);
-      d3.select(this).classed("active", true);
-    })
-    .on("mouseleave", function(){
-      if (locked.country) return;
-      chartWrap.classList.remove("hovering");
-      d3.selectAll(".layer").classed("active", false);
-      if (!locked.decade) setHover(null);
-    })
-    .on("click", function(event,d){
-      event.stopPropagation();
-      const [mx] = d3.pointer(event, g.node());
-      setSelection({ decade: nearestDecadeForX(mx).id, country: d.key });
+  // ----- stream rendering (re-runs when toggled) ---------------
+  const lightFills = new Set(["Middle East", "Japan", "Latin America"]);
+  function onLayerMousemove(event){
+    if (locked.country) return;
+    const [mx] = d3.pointer(event, g.node());
+    setHover(nearestDecadeForX(mx).id);
+    chartWrap.classList.add("hovering");
+    d3.selectAll(".layer").classed("active", false);
+    d3.select(this).classed("active", true);
+  }
+  function onLayerMouseleave(){
+    if (locked.country) return;
+    chartWrap.classList.remove("hovering");
+    d3.selectAll(".layer").classed("active", false);
+    if (!locked.decade) setHover(null);
+  }
+  function onLayerClick(event, d){
+    event.stopPropagation();
+    const [mx] = d3.pointer(event, g.node());
+    setSelection({ decade: nearestDecadeForX(mx).id, country: d.key });
+  }
+
+  function renderStreams(opts){
+    const initial = !!(opts && opts.initial);
+    const ak = activeKeys();
+    const data = computeData();
+    const customOrder = customOrderFull.filter(k => ak.includes(k));
+    const orderIdx = customOrder.map(k => ak.indexOf(k));
+    const stack = d3.stack().keys(ak).offset(d3.stackOffsetWiggle).order(() => orderIdx);
+    const series = stack(data);
+
+    const yMin = d3.min(series, l => d3.min(l, d => d[0]));
+    const yMax = d3.max(series, l => d3.max(l, d => d[1]));
+    yScale.domain([yMin, yMax]);
+
+    const area = d3.area()
+      .x(d => xScale(d.data.decade))
+      .y0(d => yScale(d[0]))
+      .y1(d => yScale(d[1]))
+      .curve(d3.curveBasis);
+
+    // streams — keyed join preserves identity across toggles
+    const layerSel = layersG.selectAll("path.layer").data(series, d => d.key);
+    layerSel.exit()
+      .transition().duration(550).style("opacity", 0).remove();
+    const layerEnter = layerSel.enter().append("path")
+      .attr("class", d => `layer layer-${cssKey(d.key)}`)
+      .attr("data-key", d => d.key)
+      .style("fill", d => colors[d.key])
+      .style("opacity", 0)
+      .attr("d", area)
+      .on("mousemove", onLayerMousemove)
+      .on("mouseleave", onLayerMouseleave)
+      .on("click", onLayerClick);
+
+    if (initial){
+      layerEnter.transition().duration(900).delay((_, i) => i * 50).style("opacity", 1);
+    } else {
+      layerSel.transition().duration(750).attr("d", area);
+      layerEnter.transition().duration(600).delay(250).style("opacity", 1);
+    }
+
+    // labels — clear and redraw on every render
+    labelsG.selectAll("text").remove();
+    series.forEach(layer => {
+      let bestI = 0, bestW = 0;
+      layer.forEach((pt, i) => { const w = pt[1] - pt[0]; if (w > bestW) { bestW = w; bestI = i; } });
+      if (bestW < 1.6) return;
+      const pt = layer[bestI];
+      const cx = xScale(pt.data.decade);
+      const cy = yScale((pt[0] + pt[1]) / 2);
+      const fontSize = Math.max(11, Math.min(20, bestW * 2.0));
+      let label = layer.key.toUpperCase();
+      if (layer.key === "Russia") label = "RUSSIA / USSR";
+      if (layer.key === "USA") label = "USA · DOMESTIC";
+      if (layer.key === "Other") label = "NON-NATIONAL";
+      labelsG.append("text")
+        .attr("class","stream-label" + (lightFills.has(layer.key) ? " dark" : ""))
+        .attr("x", cx).attr("y", cy)
+        .attr("text-anchor","middle").attr("dominant-baseline","middle")
+        .style("font-size", fontSize + "px")
+        .style("opacity", 0)
+        .text(label)
+        .transition()
+        .delay(initial ? 1100 : 700)
+        .duration(initial ? 600 : 400)
+        .style("opacity", 1);
     });
+
+    // decade n= counts
+    g.selectAll(".decade-count")
+      .text(d => "n=" + d3.sum(ak, k => data.find(r => r._id === d.id)[k]));
+  }
+
+  renderStreams({ initial: true });
+
+  // ----- USA · DOMESTIC toggle ---------------------------------
+  const usToggleBtn = document.getElementById("us-toggle");
+  usToggleBtn.addEventListener("click", () => {
+    includeUS = !includeUS;
+    usToggleBtn.classList.toggle("active", includeUS);
+    usToggleBtn.setAttribute("aria-pressed", includeUS ? "true" : "false");
+    usToggleBtn.textContent = includeUS ? "INCLUDED" : "REDACTED";
+    if (!includeUS && locked.country === "USA"){
+      locked = { decade: locked.decade, country: null };
+      applyLockedHighlight();
+      document.getElementById("clear-btn").classList.toggle("visible", !!(locked.decade || locked.country));
+    }
+    renderStreams({ initial: false });
+    renderPanel();
+  });
 
   // decade pills
   const pillBar = d3.select("#decade-pills");
@@ -1183,7 +1269,7 @@ const cssKey = k => k.replace(/\s+/g, "-");
     else renderDecade(decId);
   }
   function renderOverview(){
-    const summaries = keys.map(k => {
+    const summaries = activeKeys().map(k => {
       const all = [];
       decades.forEach(d => (films[d.id]?.[k] || []).forEach(f => all.push(f)));
       all.sort((a,b) => a[1] - b[1]);
@@ -1217,8 +1303,9 @@ const cssKey = k => k.replace(/\s+/g, "-");
   function renderDecade(decId){
     const dec = decades.find(d => d.id === decId);
     const cellMap = films[decId] || {};
-    const total = d3.sum(keys, k => (cellMap[k] || []).length);
-    const presentKeys = keys.filter(k => (cellMap[k] || []).length > 0);
+    const ak = activeKeys();
+    const total = d3.sum(ak, k => (cellMap[k] || []).length);
+    const presentKeys = ak.filter(k => (cellMap[k] || []).length > 0);
     presentKeys.sort((a,b) => cellMap[b].length - cellMap[a].length);
     panelEl.innerHTML = `
       <div class="panel-header">
