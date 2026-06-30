@@ -1197,32 +1197,49 @@ const data = decades.map(d => {
       layerEnter.transition().duration(600).delay(250).style("opacity", 1);
     }
 
-    // labels — clear and redraw on every render
-    labelsG.selectAll("text").remove();
-    series.forEach(layer => {
+    // labels — keyed join so surviving labels drift smoothly on toggle
+    const labelData = series.map(layer => {
       let bestI = 0, bestW = 0;
       layer.forEach((pt, i) => { const w = pt[1] - pt[0]; if (w > bestW) { bestW = w; bestI = i; } });
-      if (bestW < 1.6) return;
+      if (bestW < 1.6) return null;
       const pt = layer[bestI];
-      const cx = xScale(pt.data.decade);
-      const cy = yScale((pt[0] + pt[1]) / 2);
-      const fontSize = Math.max(11, Math.min(20, bestW * 2.0));
-      let label = layer.key.toUpperCase();
-      if (layer.key === "Russia") label = "RUSSIA / USSR";
-      if (layer.key === "USA") label = "USA · DOMESTIC";
-      if (layer.key === "Other") label = "NON-NATIONAL";
-      labelsG.append("text")
-        .attr("class","stream-label" + (lightFills.has(layer.key) ? " dark" : ""))
-        .attr("x", cx).attr("y", cy)
-        .attr("text-anchor","middle").attr("dominant-baseline","middle")
-        .style("font-size", fontSize + "px")
-        .style("opacity", 0)
-        .text(label)
-        .transition()
-        .delay(initial ? 1100 : 700)
-        .duration(initial ? 600 : 400)
-        .style("opacity", 1);
-    });
+      const text = layer.key === "Russia" ? "RUSSIA / USSR"
+                 : layer.key === "USA"    ? "USA · DOMESTIC"
+                 : layer.key === "Other"  ? "NON-NATIONAL"
+                 : layer.key.toUpperCase();
+      return {
+        key: layer.key,
+        cx: xScale(pt.data.decade),
+        cy: yScale((pt[0] + pt[1]) / 2),
+        fontSize: Math.max(11, Math.min(20, bestW * 2.0)),
+        text
+      };
+    }).filter(Boolean);
+
+    const labelSel = labelsG.selectAll("text.stream-label").data(labelData, d => d.key);
+
+    labelSel.exit()
+      .transition().duration(450).style("opacity", 0).remove();
+
+    const labelEnter = labelSel.enter().append("text")
+      .attr("class", d => "stream-label" + (lightFills.has(d.key) ? " dark" : ""))
+      .attr("x", d => d.cx).attr("y", d => d.cy)
+      .attr("text-anchor","middle").attr("dominant-baseline","middle")
+      .style("font-size", d => d.fontSize + "px")
+      .style("opacity", 0)
+      .text(d => d.text);
+
+    labelEnter.transition()
+      .delay(initial ? 1100 : 500)
+      .duration(initial ? 600 : 400)
+      .style("opacity", 1);
+
+    if (!initial){
+      labelSel.transition().duration(750)
+        .attr("x", d => d.cx)
+        .attr("y", d => d.cy)
+        .style("font-size", d => d.fontSize + "px");
+    }
 
     // decade n= counts
     g.selectAll(".decade-count")
