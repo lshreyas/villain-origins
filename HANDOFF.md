@@ -15,6 +15,7 @@ GitHub Pages serves the repo. The custom domain `www.lakhtak.io` is configured a
 - `index.html` — the dossier itself: cover + nav + five exhibits in one long scroll.
 - `dataset.html` — methodology page: how the dataset was built, what's in it, what's missing, and a searchable catalog of every film.
 - `films.js` — shared data: decades, keys, fullNames, colors, films, events, eraBands, isoToCategory, industryContext. Loaded by both HTML pages.
+- `styles.html` — **design exploration page**, not linked from the dossier. Five candidate redesigns (modern editorial / magazine longform / financial / Tufte / manga) applied to the hero + Exhibit I + a sample panel. Self-contained: uses its own static mini-dataset for the streamgraph, so it doesn't read `films.js`. Live at `/styles.html`. See "Next decisions" below.
 - `.git/` — repo history.
 
 No build step. D3 v7, topojson-client, world-atlas, and Google Fonts via CDN.
@@ -106,14 +107,37 @@ git push origin main
 
 Commits should be `Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>` when generated this way (existing convention in `git log`).
 
+## Next decisions (pick up here)
+
+**Active: visual redesign.** The "Cold War Declassified" aesthetic (manila + sepia + typewriter) no longer feels right to Shreyas. We built `styles.html` as a side-by-side comparison of five fresh directions, applied to a representative slice of content (hero + Exhibit I overview + 3-card panel fragment). Each card shows a static streamgraph in that style's palette so the chart-reading experience is included in the comparison, not just the chrome.
+
+Candidates in `styles.html`:
+
+| # | Direction | Typography | Palette |
+|---|-----------|-----------|---------|
+| 01 | Modern editorial (Pudding / NYT Graphics) | Lora serif headlines + Inter body | Muted earth tones, off-white bg, single red accent |
+| 02 | Magazine longform (Atlantic / New Yorker) | Playfair Display + Lora body, italic accents, drop cap | Warm cream bg, burgundy accent, jewel-tone ribbons |
+| 03 | Financial / newsroom (FT / Reuters) | Oswald condensed + Source Sans 3 | FT salmon bg, signal red + FT blue + mustard ribbons |
+| 04 | Tufte minimal | EB Garamond throughout, margin notes | Pure white, mostly grayscale ribbons, one alert-red |
+| 05 | Japanese comic book (shōnen manga) | Bangers display + Inter body | Halftone-dot bg, yellow + red + cyan + black pop |
+
+Shreyas asked for all five mocked up (including manga as a wildcard) before committing. When he picks (or asks for a remix of two), the re-skin scope is: `index.html` + `dataset.html` (palette + typography + chrome of all exhibits + control bars + panels). `films.js` and the static streamgraph in `styles.html` don't need to change.
+
+My pre-commit lean: **03 (financial)** reads most authoritative for the dossier's argumentative shape; **02 (magazine)** is the most evocative; **05 (manga)** is fun but probably fights the seriousness of the subject. He has not yet picked.
+
+**Then in line behind that:**
+1. TV/streaming expansion — biggest story unlock from the "what's missing" list. Need a schema decision (per-show vs per-season) and a curation pass on ~15 prestige series (Americans, Homeland, Killing Eve, Jack Ryan, 24, Slow Horses, Tehran, Berlin Station, etc.). Owns the dataset's voice; do collaboratively.
+2. Per-film box office for Exhibit V — would let "villain frequency tracks box-office stakes" become a per-film argument. Box Office Mojo source; scope to top ~100 for tractability.
+
 ## Conversation arc (for context)
 
-1. Picked Hollywood villains + streamgraph + standalone D3 HTML; I curated the initial ~280-film dataset.
-2. Explored other visual styles, settled on Cold War Declassified.
+1. Picked Hollywood villains + streamgraph + standalone D3 HTML; initial ~280-film dataset curated by Shreyas.
+2. Explored visual styles, settled on Cold War Declassified.
 3. Added three more exhibits (constellation, world map, rankings/horizon) for a four-exhibit dossier.
 4. Expanded dataset to ~500 films and reordered exhibits to the current 1–4 layout.
 5. Added Exhibit V (The China question) after asking why China was underrepresented despite real geopolitical tension.
-6. Built the methodology page (`dataset.html`) and extracted `films.js` for sharing data between the two HTML pages; fixed the China analytical footnote contrast issue; cleaned up slop copy throughout.
+6. Built the methodology page (`dataset.html`) and extracted `films.js`; fixed the China footnote contrast; cleaned up slop copy.
+7. **2026-06-29 session.** Shipped the USA · DOMESTIC toggle on Exhibit I (keyed D3 join, decade counts + panel respect the toggle, locked USA selection auto-clears on redact). Polished label transitions on toggle (surviving labels drift to new positions instead of fading out/in). Then turned to redesign: built `styles.html` with the five candidate directions described above. Cold War Declassified aesthetic is now flagged for replacement.
 
 `git log` is the authoritative timeline — see commit messages for what changed when.
 
