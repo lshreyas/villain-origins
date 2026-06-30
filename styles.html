@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Style Explorer · villain-origins</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=EB+Garamond:ital,wght@0,400;0,500;0,700;1,400&family=Oswald:wght@300;400;500;700&family=Anton&family=Bangers&family=Bowlby+One&family=IBM+Plex+Mono&family=Work+Sans:wght@300;400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@300;400;600&family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+
+/* =====================================================================
+   PAGE CHROME (the explorer itself — not part of any style)
+   ===================================================================== */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:#0e0e0e;color:#ddd;
+  font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5;
+}
+.top{padding:36px 56px 28px;border-bottom:1px solid #2a2a2a}
+.top h1{
+  margin:0 0 10px;font-family:'IBM Plex Mono',monospace;
+  font-size:12px;letter-spacing:0.32em;text-transform:uppercase;
+  color:#fff;font-weight:500;
+}
+.top p{margin:0;color:#9a9a9a;font-size:13px;max-width:68ch;line-height:1.6}
+.toc{
+  margin:20px 0 0;display:flex;gap:22px;flex-wrap:wrap;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;letter-spacing:0.24em;text-transform:uppercase;
+}
+.toc a{color:#9a9a9a;text-decoration:none;border-bottom:1px solid #333;padding-bottom:2px}
+.toc a:hover{color:#fff;border-color:#fff}
+
+.style-card{
+  margin:48px auto;max-width:1240px;
+  border:1px solid #2a2a2a;
+  background:#1a1a1a;
+  overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,0.4);
+}
+.style-label{
+  background:#000;color:#fff;padding:15px 28px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;letter-spacing:0.32em;text-transform:uppercase;
+  display:flex;justify-content:space-between;align-items:center;gap:24px;
+  border-bottom:1px solid #1f1f1f;
+}
+.style-label .num{color:#5a5a5a}
+.style-label .name{color:#fff;font-weight:600}
+.style-label .refs{color:#5a5a5a;text-align:right}
+
+.mockup{position:relative;overflow:hidden}
+.m-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+
+/* =====================================================================
+   STYLE 01 — MODERN EDITORIAL  (Pudding · NYT Graphics · Bloomberg)
+   Restrained, generous whitespace, refined serif headlines.
+   ===================================================================== */
+.style-01 .mockup{background:#fbfaf6;color:#1a1a1a;font-family:'Inter',system-ui,sans-serif}
+.style-01 .m-hero{padding:72px 72px 40px}
+.style-01 .m-eyebrow{
+  font-size:11px;letter-spacing:0.24em;text-transform:uppercase;
+  color:#a39a86;font-weight:600;margin-bottom:18px;
+}
+.style-01 .m-title{
+  font-family:'Lora',serif;font-weight:700;
+  font-size:60px;line-height:1.04;letter-spacing:-0.014em;
+  margin:0 0 22px;max-width:18ch;color:#0e0e0e;
+}
+.style-01 .m-dek{font-size:18px;line-height:1.55;color:#3a3a3a;max-width:60ch;margin:0}
+.style-01 .m-exhibit{padding:36px 72px 12px;border-top:1px solid #e6dfc8}
+.style-01 .m-exhibit-label{
+  font-size:11px;letter-spacing:0.24em;text-transform:uppercase;
+  color:#c0392b;font-weight:700;margin-bottom:8px;
+}
+.style-01 .m-exhibit-h{
+  font-family:'Lora',serif;font-weight:600;
+  font-size:30px;line-height:1.2;margin:0 0 10px;color:#0e0e0e;
+}
+.style-01 .m-exhibit-deck{font-size:15px;color:#5a5a5a;max-width:62ch;margin:0 0 28px}
+.style-01 .m-controls{
+  padding:14px 72px;margin:0 0 4px;display:flex;gap:22px;flex-wrap:wrap;align-items:center;
+  border-top:1px solid #e6dfc8;border-bottom:1px solid #e6dfc8;
+}
+.style-01 .m-control-label{font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:#a39a86;font-weight:600}
+.style-01 .m-pill{
+  font-family:'Inter',sans-serif;font-size:12px;font-weight:500;
+  padding:6px 12px;background:transparent;border:1px solid #d4cdba;
+  color:#3a3a3a;cursor:pointer;border-radius:2px;
+}
+.style-01 .m-pill.on{background:#0e0e0e;color:#fff;border-color:#0e0e0e}
+.style-01 .m-toggle{
+  font-family:'Inter',sans-serif;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+  padding:7px 14px;background:#c0392b;color:#fff;border:0;border-radius:2px;font-weight:600;
+}
+.style-01 .m-panel{padding:42px 72px 72px}
+.style-01 .m-panel-title{
+  font-family:'Lora',serif;font-weight:600;font-size:22px;color:#0e0e0e;margin:0 0 22px;
+}
+.style-01 .m-card{background:#fff;border:1px solid #ece5d0;padding:18px 18px 14px;border-radius:3px}
+.style-01 .m-card-name{font-size:13px;letter-spacing:0.16em;text-transform:uppercase;font-weight:700;color:#0e0e0e;margin-bottom:3px}
+.style-01 .m-card-count{font-size:11px;color:#a39a86;margin-bottom:14px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.12em}
+.style-01 .m-card ul{margin:0;padding:0;list-style:none}
+.style-01 .m-card li{font-size:13px;color:#3a3a3a;padding:7px 0;border-top:1px solid #f3eee0;display:flex;gap:10px}
+.style-01 .m-card li .year{font-family:'IBM Plex Mono',monospace;color:#a39a86;font-size:11px;min-width:36px}
+
+/* =====================================================================
+   STYLE 02 — MAGAZINE LONGFORM  (Atlantic · New Yorker · Harper's)
+   Warm cream, display serif, italic accents, editorial gravitas.
+   ===================================================================== */
+.style-02 .mockup{background:#efe6d2;color:#231e16;font-family:'Lora',Georgia,serif}
+.style-02 .m-hero{padding:76px 80px 40px;position:relative}
+.style-02 .m-hero::before{
+  content:"";position:absolute;left:80px;right:80px;top:46px;height:1px;
+  background:#231e16;opacity:0.65;
+}
+.style-02 .m-hero::after{
+  content:"";position:absolute;left:80px;right:80px;top:50px;height:1px;
+  background:#231e16;opacity:0.65;
+}
+.style-02 .m-eyebrow{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;
+  font-size:14px;letter-spacing:0.04em;color:#7a2820;margin-bottom:28px;
+}
+.style-02 .m-title{
+  font-family:'Playfair Display',serif;font-weight:900;
+  font-size:74px;line-height:1.02;letter-spacing:-0.018em;
+  margin:0 0 26px;max-width:14ch;color:#1a140c;
+}
+.style-02 .m-title em{font-style:italic;font-weight:400;color:#7a2820}
+.style-02 .m-dek{
+  font-family:'Lora',serif;font-size:18px;line-height:1.6;color:#3a3128;max-width:58ch;margin:0;
+}
+.style-02 .m-dek::first-letter{
+  font-family:'Playfair Display',serif;float:left;
+  font-size:62px;line-height:0.9;font-weight:700;
+  padding:6px 8px 0 0;color:#7a2820;
+}
+.style-02 .m-exhibit{padding:44px 80px 12px;border-top:double 4px #231e16}
+.style-02 .m-exhibit-label{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:14px;letter-spacing:0.04em;color:#7a2820;margin-bottom:6px;
+}
+.style-02 .m-exhibit-label::after{content:" §"}
+.style-02 .m-exhibit-h{
+  font-family:'Playfair Display',serif;font-weight:700;
+  font-size:36px;line-height:1.15;margin:0 0 10px;color:#1a140c;
+}
+.style-02 .m-exhibit-deck{font-family:'Lora',serif;font-size:16px;color:#4a4036;max-width:62ch;margin:0 0 28px;line-height:1.55}
+.style-02 .m-controls{
+  padding:16px 80px;display:flex;gap:22px;flex-wrap:wrap;align-items:center;
+  border-top:1px solid #231e16;border-bottom:1px solid #231e16;
+  background:rgba(35,30,22,0.04);
+}
+.style-02 .m-control-label{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:#7a2820;
+}
+.style-02 .m-pill{
+  font-family:'Lora',serif;font-size:13px;font-weight:500;font-style:italic;
+  padding:4px 10px;background:transparent;border:1px solid #231e16;
+  color:#231e16;cursor:pointer;border-radius:0;
+}
+.style-02 .m-pill.on{background:#231e16;color:#efe6d2;font-style:normal;font-weight:600}
+.style-02 .m-toggle{
+  font-family:'Lora',serif;font-size:13px;font-weight:600;
+  padding:5px 14px;background:#7a2820;color:#efe6d2;border:0;border-radius:0;letter-spacing:0.03em;
+}
+.style-02 .m-panel{padding:48px 80px 76px}
+.style-02 .m-panel-title{
+  font-family:'Playfair Display',serif;font-weight:700;font-size:26px;color:#1a140c;margin:0 0 24px;
+}
+.style-02 .m-card{background:rgba(255,251,238,0.5);border:1px solid #c5b896;padding:20px 22px 16px}
+.style-02 .m-card-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#1a140c;margin-bottom:2px}
+.style-02 .m-card-count{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:#7a2820;margin-bottom:14px}
+.style-02 .m-card ul{margin:0;padding:0;list-style:none}
+.style-02 .m-card li{font-family:'Lora',serif;font-size:14px;color:#231e16;padding:7px 0;border-top:1px solid #d6c9a8;display:flex;gap:10px}
+.style-02 .m-card li .year{font-family:'Cormorant Garamond',serif;font-style:italic;color:#7a2820;font-size:14px;min-width:36px}
+
+/* =====================================================================
+   STYLE 03 — FINANCIAL / NEWSROOM  (FT · Reuters · Bloomberg news)
+   Dense, condensed sans, signal red on warm white, grid-heavy.
+   ===================================================================== */
+.style-03 .mockup{background:#fff1e5;color:#1a1a1a;font-family:'Source Sans 3','Inter',system-ui,sans-serif}
+.style-03 .m-hero{padding:48px 64px 32px}
+.style-03 .m-eyebrow{
+  font-family:'Oswald',sans-serif;font-weight:400;
+  font-size:11px;letter-spacing:0.32em;text-transform:uppercase;
+  color:#9a3022;margin-bottom:14px;
+}
+.style-03 .m-eyebrow .sep{color:#1a1a1a;margin:0 8px;opacity:0.4}
+.style-03 .m-title{
+  font-family:'Oswald',sans-serif;font-weight:500;
+  font-size:62px;line-height:1.0;letter-spacing:-0.005em;text-transform:uppercase;
+  margin:0 0 18px;max-width:24ch;color:#1a1a1a;
+}
+.style-03 .m-title .accent{color:#9a3022}
+.style-03 .m-dek{
+  font-size:15px;line-height:1.55;color:#3a3a3a;max-width:74ch;margin:0;
+  border-left:3px solid #9a3022;padding-left:14px;
+}
+.style-03 .m-exhibit{padding:28px 64px 8px;border-top:2px solid #1a1a1a}
+.style-03 .m-exhibit-label{
+  font-family:'Oswald',sans-serif;font-weight:400;
+  font-size:11px;letter-spacing:0.28em;text-transform:uppercase;
+  color:#9a3022;margin-bottom:6px;
+}
+.style-03 .m-exhibit-h{
+  font-family:'Oswald',sans-serif;font-weight:500;
+  font-size:34px;line-height:1.05;text-transform:uppercase;letter-spacing:-0.005em;
+  margin:0 0 8px;color:#1a1a1a;
+}
+.style-03 .m-exhibit-deck{font-size:14px;color:#4a4a4a;max-width:74ch;margin:0 0 24px;line-height:1.55}
+.style-03 .m-controls{
+  padding:12px 64px;background:#f5e2c7;display:flex;gap:18px;flex-wrap:wrap;align-items:center;
+  border-top:1px solid #1a1a1a;border-bottom:1px solid #1a1a1a;
+}
+.style-03 .m-control-label{
+  font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:#1a1a1a;
+}
+.style-03 .m-pill{
+  font-family:'Source Sans 3',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.08em;
+  padding:5px 10px;background:#fff1e5;border:1px solid #1a1a1a;
+  color:#1a1a1a;cursor:pointer;border-radius:0;text-transform:uppercase;
+}
+.style-03 .m-pill.on{background:#9a3022;color:#fff1e5;border-color:#9a3022}
+.style-03 .m-toggle{
+  font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;
+  padding:6px 14px;background:#9a3022;color:#fff1e5;border:0;font-weight:500;
+}
+.style-03 .m-panel{padding:32px 64px 60px}
+.style-03 .m-panel-title{
+  font-family:'Oswald',sans-serif;font-weight:500;font-size:22px;text-transform:uppercase;letter-spacing:0.02em;
+  color:#1a1a1a;margin:0 0 18px;padding-bottom:8px;border-bottom:2px solid #1a1a1a;
+}
+.style-03 .m-card{background:#fff8ec;border:1px solid #1a1a1a;padding:14px 16px 12px}
+.style-03 .m-card-name{
+  font-family:'Oswald',sans-serif;font-weight:500;font-size:15px;letter-spacing:0.06em;
+  text-transform:uppercase;color:#1a1a1a;margin-bottom:2px;
+}
+.style-03 .m-card-count{
+  font-family:'Source Sans 3',sans-serif;font-size:11px;color:#9a3022;font-weight:600;letter-spacing:0.12em;
+  margin-bottom:12px;text-transform:uppercase;
+}
+.style-03 .m-card ul{margin:0;padding:0;list-style:none}
+.style-03 .m-card li{font-size:13px;color:#1a1a1a;padding:6px 0;border-top:1px solid #e8d6b5;display:flex;gap:10px}
+.style-03 .m-card li .year{font-family:'Oswald',sans-serif;color:#9a3022;font-size:13px;font-weight:400;min-width:36px;letter-spacing:0.04em}
+
+/* =====================================================================
+   STYLE 04 — TUFTE MINIMAL  (Edward Tufte, ET Book aesthetic)
+   Pure white, mostly grayscale, marginalia, data-ink maximized.
+   ===================================================================== */
+.style-04 .mockup{background:#fffff8;color:#111;font-family:'EB Garamond',Georgia,serif}
+.style-04 .m-hero{padding:68px 80px 40px 220px;position:relative}
+.style-04 .m-eyebrow{
+  font-family:'EB Garamond',serif;font-style:italic;
+  font-size:14px;color:#666;margin-bottom:12px;
+}
+.style-04 .m-title{
+  font-family:'EB Garamond',serif;font-weight:400;
+  font-size:46px;line-height:1.15;letter-spacing:-0.005em;
+  margin:0 0 14px;max-width:22ch;color:#111;
+}
+.style-04 .m-dek{font-size:18px;line-height:1.5;color:#222;max-width:60ch;margin:0;font-family:'EB Garamond',serif}
+.style-04 .m-exhibit{padding:32px 80px 4px 220px;position:relative}
+.style-04 .m-exhibit-label{
+  font-family:'EB Garamond',serif;font-style:italic;
+  font-size:13px;color:#888;margin-bottom:4px;
+}
+.style-04 .m-exhibit-h{
+  font-family:'EB Garamond',serif;font-weight:400;
+  font-size:26px;line-height:1.2;margin:0 0 6px;color:#111;
+}
+.style-04 .m-exhibit-deck{font-size:15px;color:#333;max-width:62ch;margin:0 0 28px;line-height:1.5;font-style:italic}
+.style-04 .m-chart-wrap{position:relative}
+.style-04 .m-margin-note{
+  position:absolute;left:-180px;top:30px;width:160px;
+  font-size:12px;color:#777;font-style:italic;line-height:1.4;
+}
+.style-04 .m-controls{
+  padding:14px 80px 14px 220px;display:flex;gap:18px;flex-wrap:wrap;align-items:center;
+}
+.style-04 .m-control-label{font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:#888}
+.style-04 .m-pill{
+  font-family:'EB Garamond',serif;font-size:14px;
+  padding:2px 8px;background:transparent;border:0;border-bottom:1px solid transparent;
+  color:#333;cursor:pointer;border-radius:0;
+}
+.style-04 .m-pill.on{border-bottom-color:#111;color:#111;font-weight:600}
+.style-04 .m-toggle{
+  font-family:'EB Garamond',serif;font-size:13px;font-style:italic;
+  padding:2px 8px;background:transparent;color:#a83a2a;border:0;border-bottom:1px solid #a83a2a;
+}
+.style-04 .m-panel{padding:36px 80px 72px 220px}
+.style-04 .m-panel-title{font-family:'EB Garamond',serif;font-weight:400;font-style:italic;font-size:20px;color:#444;margin:0 0 18px}
+.style-04 .m-card{background:transparent;border:0;border-top:1px solid #ccc;padding:14px 0 0}
+.style-04 .m-card-name{font-family:'EB Garamond',serif;font-size:16px;font-weight:600;color:#111;margin-bottom:0}
+.style-04 .m-card-count{font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:#888;margin-bottom:10px}
+.style-04 .m-card ul{margin:0;padding:0;list-style:none}
+.style-04 .m-card li{font-family:'EB Garamond',serif;font-size:14px;color:#222;padding:3px 0;display:flex;gap:10px}
+.style-04 .m-card li .year{font-family:'EB Garamond',serif;font-style:italic;color:#888;font-size:13px;min-width:34px}
+
+/* =====================================================================
+   STYLE 05 — JAPANESE COMIC BOOK  (manga / shōnen action layout)
+   Halftone, thick panel borders, impact font headlines, pop colors.
+   ===================================================================== */
+.style-05 .mockup{
+  background:
+    radial-gradient(circle at 1px 1px, rgba(20,20,20,0.13) 1px, transparent 1.5px) 0 0/8px 8px,
+    #f5ecd9;
+  color:#1a1a1a;font-family:'Inter','Noto Sans JP',sans-serif;
+}
+.style-05 .m-hero{
+  padding:48px 56px 32px;border-bottom:5px solid #1a1a1a;position:relative;
+  background:
+    linear-gradient(0deg, transparent 0, transparent calc(100% - 32px), #1a1a1a 100%),
+    radial-gradient(circle at 1px 1px, rgba(20,20,20,0.13) 1px, transparent 1.5px) 0 0/8px 8px,
+    #f5ecd9;
+  background:transparent;
+}
+.style-05 .m-eyebrow{
+  display:inline-block;
+  font-family:'Bangers',cursive;font-weight:400;
+  font-size:18px;letter-spacing:0.06em;text-transform:uppercase;
+  color:#f5ecd9;background:#1a1a1a;padding:5px 14px 3px;margin-bottom:18px;
+  transform:rotate(-1.2deg);
+}
+.style-05 .m-title{
+  font-family:'Bangers','Bowlby One',cursive;font-weight:400;
+  font-size:96px;line-height:0.94;letter-spacing:0.012em;text-transform:uppercase;
+  margin:0 0 16px;max-width:18ch;color:#1a1a1a;
+  -webkit-text-stroke:0;
+  text-shadow:5px 5px 0 #d9304a, 6px 6px 0 #1a1a1a;
+}
+.style-05 .m-title .pop{color:#d9304a;display:inline-block;transform:rotate(-2deg)}
+.style-05 .m-dek{
+  position:relative;display:inline-block;
+  background:#fffceb;border:3px solid #1a1a1a;padding:18px 22px 16px;
+  font-size:15px;line-height:1.55;color:#1a1a1a;max-width:56ch;margin:14px 0 0;
+  border-radius:18px;
+  box-shadow:5px 5px 0 #1a1a1a;
+}
+.style-05 .m-dek::after{
+  content:"";position:absolute;left:32px;bottom:-22px;width:0;height:0;
+  border:11px solid transparent;border-top:18px solid #1a1a1a;
+}
+.style-05 .m-dek::before{
+  content:"";position:absolute;left:34px;bottom:-15px;width:0;height:0;
+  border:9px solid transparent;border-top:15px solid #fffceb;z-index:1;
+}
+.style-05 .m-exhibit{
+  padding:36px 56px 8px;border-top:5px solid #1a1a1a;position:relative;
+  background:
+    radial-gradient(circle at 1px 1px, rgba(20,20,20,0.13) 1px, transparent 1.5px) 0 0/8px 8px,
+    #f5ecd9;
+}
+.style-05 .m-exhibit::before{
+  content:"EXHIBIT I";position:absolute;top:-18px;left:32px;
+  background:#d9304a;color:#fffceb;padding:5px 14px 3px;
+  font-family:'Bangers',cursive;font-size:16px;letter-spacing:0.1em;
+  border:3px solid #1a1a1a;transform:rotate(-1.5deg);
+}
+.style-05 .m-exhibit-label{display:none}
+.style-05 .m-exhibit-h{
+  font-family:'Bangers',cursive;font-weight:400;
+  font-size:54px;line-height:1.0;letter-spacing:0.015em;text-transform:uppercase;
+  margin:18px 0 10px;color:#1a1a1a;
+  text-shadow:3px 3px 0 #f5d442;
+}
+.style-05 .m-exhibit-deck{font-family:'Inter',sans-serif;font-size:15px;color:#2a2a2a;max-width:64ch;margin:0 0 28px;line-height:1.55;font-weight:500}
+.style-05 .m-controls{
+  padding:14px 56px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;
+  background:#1a1a1a;border-top:5px solid #1a1a1a;border-bottom:5px solid #1a1a1a;
+}
+.style-05 .m-control-label{
+  font-family:'Bangers',cursive;font-size:14px;letter-spacing:0.14em;color:#f5d442;text-transform:uppercase;
+}
+.style-05 .m-pill{
+  font-family:'Bangers',cursive;font-size:14px;letter-spacing:0.08em;
+  padding:5px 12px 3px;background:#f5ecd9;border:2px solid #f5ecd9;
+  color:#1a1a1a;cursor:pointer;border-radius:0;text-transform:uppercase;
+}
+.style-05 .m-pill.on{background:#d9304a;color:#fffceb;border-color:#d9304a}
+.style-05 .m-toggle{
+  font-family:'Bangers',cursive;font-size:14px;letter-spacing:0.1em;text-transform:uppercase;
+  padding:5px 14px 3px;background:#d9304a;color:#fffceb;border:3px solid #fffceb;font-weight:400;
+  transform:rotate(-1deg);
+}
+.style-05 .m-panel{
+  padding:44px 56px 64px;
+  background:
+    radial-gradient(circle at 1px 1px, rgba(20,20,20,0.13) 1px, transparent 1.5px) 0 0/8px 8px,
+    #f5ecd9;
+}
+.style-05 .m-panel-title{
+  font-family:'Bangers',cursive;font-weight:400;font-size:34px;letter-spacing:0.04em;text-transform:uppercase;
+  color:#1a1a1a;margin:0 0 22px;text-shadow:3px 3px 0 #2a8acb;
+}
+.style-05 .m-card{background:#fffceb;border:3px solid #1a1a1a;padding:14px 16px 12px;box-shadow:4px 4px 0 #1a1a1a}
+.style-05 .m-card-name{
+  font-family:'Bangers',cursive;font-size:20px;letter-spacing:0.05em;text-transform:uppercase;
+  color:#1a1a1a;margin-bottom:2px;
+}
+.style-05 .m-card-count{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;color:#d9304a;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:12px}
+.style-05 .m-card ul{margin:0;padding:0;list-style:none}
+.style-05 .m-card li{font-family:'Inter',sans-serif;font-size:13px;font-weight:500;color:#1a1a1a;padding:6px 0;border-top:2px dashed #1a1a1a;display:flex;gap:10px}
+.style-05 .m-card li .year{font-family:'Bangers',cursive;color:#2a8acb;font-size:14px;letter-spacing:0.04em;min-width:36px}
+
+/* =====================================================================
+   STREAMGRAPH SVG STYLING (per-style label fonts)
+   ===================================================================== */
+.style-01 .stream-label{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;pointer-events:none}
+.style-02 .stream-label{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;font-weight:600;letter-spacing:0.04em;pointer-events:none}
+.style-03 .stream-label{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;pointer-events:none}
+.style-04 .stream-label{font-family:'EB Garamond',serif;font-style:italic;font-size:13px;pointer-events:none}
+.style-05 .stream-label{font-family:'Bangers',cursive;font-size:16px;letter-spacing:0.04em;text-transform:uppercase;pointer-events:none}
+.tick{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.18em}
+.style-02 .tick{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;letter-spacing:0.02em}
+.style-04 .tick{font-family:'EB Garamond',serif;font-style:italic;font-size:12px}
+.style-05 .tick{font-family:'Bangers',cursive;font-size:13px;letter-spacing:0.06em}
+
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>STYLE EXPLORER · villain-origins</h1>
+  <p>Five candidate design languages applied to the same content (dossier hero + Exhibit I overview + a sample panel fragment). The current "Cold War Declassified" dossier is none of these — these are fresh starts so we can pick a direction (or remix two).</p>
+  <div class="toc">
+    <a href="#s01">01 · Modern editorial</a>
+    <a href="#s02">02 · Magazine longform</a>
+    <a href="#s03">03 · Financial / newsroom</a>
+    <a href="#s04">04 · Tufte minimal</a>
+    <a href="#s05">05 · Japanese comic book</a>
+  </div>
+</div>
+
+<!-- 01 -->
+<section class="style-card style-01" id="s01">
+  <div class="style-label"><span><span class="num">01 / 05 ·</span> <span class="name">Modern Editorial</span></span><span class="refs">The Pudding · NYT Graphics · Bloomberg</span></div>
+  <div class="mockup">
+    <div class="m-hero">
+      <div class="m-eyebrow">A villain-origins dossier · 1940–2025</div>
+      <h2 class="m-title">The changing face of the villain.</h2>
+      <p class="m-dek">We tagged the primary antagonist in roughly 500 Hollywood films and plotted the result across eight decades. Nazis dominate the 1940s. Soviets take over for forty years, fade in the 1990s, then come back after 2014.</p>
+    </div>
+    <div class="m-exhibit">
+      <div class="m-exhibit-label">Exhibit I · Overview</div>
+      <h3 class="m-exhibit-h">All eleven origins, in one chart</h3>
+      <p class="m-exhibit-deck">The same data, stacked into a single flowing chart. Each ribbon is one origin; its thickness in any decade is the number of villains we tagged to that origin.</p>
+      <div class="m-chart-wrap" data-stream="01"></div>
+    </div>
+    <div class="m-controls">
+      <span class="m-control-label">Decade</span>
+      <button class="m-pill">1940s</button>
+      <button class="m-pill">1960s</button>
+      <button class="m-pill on">1980s</button>
+      <button class="m-pill">2000s</button>
+      <button class="m-pill">2020s</button>
+      <span class="m-control-label" style="margin-left:auto">US · domestic</span>
+      <button class="m-toggle">Included</button>
+    </div>
+    <div class="m-panel">
+      <div class="m-panel-title">The 1980s · Cold War's last act</div>
+      <div class="m-cards">
+        <div class="m-card"><div class="m-card-name">Russia / USSR</div><div class="m-card-count">16 films</div><ul><li><span class="year">1984</span>Red Dawn</li><li><span class="year">1985</span>Rocky IV</li><li><span class="year">1988</span>Rambo III</li></ul></div>
+        <div class="m-card"><div class="m-card-name">USA · Domestic</div><div class="m-card-count">18 films</div><ul><li><span class="year">1980</span>Raging Bull</li><li><span class="year">1987</span>Wall Street</li><li><span class="year">1988</span>Die Hard</li></ul></div>
+        <div class="m-card"><div class="m-card-name">Middle East</div><div class="m-card-count">2 films</div><ul><li><span class="year">1985</span>Iron Eagle</li><li><span class="year">1986</span>Top Gun</li></ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="style-card style-02" id="s02">
+  <div class="style-label"><span><span class="num">02 / 05 ·</span> <span class="name">Magazine Longform</span></span><span class="refs">The Atlantic · The New Yorker · Harper's</span></div>
+  <div class="mockup">
+    <div class="m-hero">
+      <div class="m-eyebrow">a villain-origins dossier, 1940–2025</div>
+      <h2 class="m-title">The Changing Face of the <em>Villain</em></h2>
+      <p class="m-dek">We tagged the primary antagonist in roughly 500 Hollywood films and plotted the result across eight decades. Nazis dominate the 1940s. Soviets take over for forty years, fade in the 1990s, then come back after 2014.</p>
+    </div>
+    <div class="m-exhibit">
+      <div class="m-exhibit-label">Exhibit I · An overview</div>
+      <h3 class="m-exhibit-h">All eleven origins, in one chart</h3>
+      <p class="m-exhibit-deck">The same data, stacked into a single flowing chart. Each ribbon is one origin; its thickness in any decade is the number of villains we tagged to that origin.</p>
+      <div class="m-chart-wrap" data-stream="02"></div>
+    </div>
+    <div class="m-controls">
+      <span class="m-control-label">decade</span>
+      <button class="m-pill">1940s</button>
+      <button class="m-pill">1960s</button>
+      <button class="m-pill on">1980s</button>
+      <button class="m-pill">2000s</button>
+      <button class="m-pill">2020s</button>
+      <span class="m-control-label" style="margin-left:auto">us &middot; domestic</span>
+      <button class="m-toggle">Included</button>
+    </div>
+    <div class="m-panel">
+      <div class="m-panel-title">The 1980s &mdash; Cold War's last act</div>
+      <div class="m-cards">
+        <div class="m-card"><div class="m-card-name">Russia / USSR</div><div class="m-card-count">sixteen films</div><ul><li><span class="year">1984</span>Red Dawn</li><li><span class="year">1985</span>Rocky IV</li><li><span class="year">1988</span>Rambo III</li></ul></div>
+        <div class="m-card"><div class="m-card-name">USA · Domestic</div><div class="m-card-count">eighteen films</div><ul><li><span class="year">1980</span>Raging Bull</li><li><span class="year">1987</span>Wall Street</li><li><span class="year">1988</span>Die Hard</li></ul></div>
+        <div class="m-card"><div class="m-card-name">Middle East</div><div class="m-card-count">two films</div><ul><li><span class="year">1985</span>Iron Eagle</li><li><span class="year">1986</span>Top Gun</li></ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="style-card style-03" id="s03">
+  <div class="style-label"><span><span class="num">03 / 05 ·</span> <span class="name">Financial / Newsroom</span></span><span class="refs">FT Graphics · Reuters · Bloomberg news</span></div>
+  <div class="mockup">
+    <div class="m-hero">
+      <div class="m-eyebrow">VILLAIN-ORIGINS<span class="sep">·</span>HOLLYWOOD<span class="sep">·</span>1940–2025</div>
+      <h2 class="m-title">The changing face of the <span class="accent">villain</span>.</h2>
+      <p class="m-dek">We tagged the primary antagonist in roughly 500 Hollywood films and plotted the result across eight decades. Nazis dominate the 1940s. Soviets take over for forty years, fade in the 1990s, then come back after 2014.</p>
+    </div>
+    <div class="m-exhibit">
+      <div class="m-exhibit-label">Exhibit I · Overview</div>
+      <h3 class="m-exhibit-h">All eleven origins, in one chart</h3>
+      <p class="m-exhibit-deck">The same data, stacked into a single flowing chart. Each ribbon is one origin; its thickness in any decade is the number of villains we tagged to that origin.</p>
+      <div class="m-chart-wrap" data-stream="03"></div>
+    </div>
+    <div class="m-controls">
+      <span class="m-control-label">DECADE</span>
+      <button class="m-pill">1940s</button>
+      <button class="m-pill">1960s</button>
+      <button class="m-pill on">1980s</button>
+      <button class="m-pill">2000s</button>
+      <button class="m-pill">2020s</button>
+      <span class="m-control-label" style="margin-left:auto">US · DOMESTIC</span>
+      <button class="m-toggle">Included</button>
+    </div>
+    <div class="m-panel">
+      <div class="m-panel-title">The 1980s — Cold War's last act</div>
+      <div class="m-cards">
+        <div class="m-card"><div class="m-card-name">Russia / USSR</div><div class="m-card-count">16 films · decade total</div><ul><li><span class="year">1984</span>Red Dawn</li><li><span class="year">1985</span>Rocky IV</li><li><span class="year">1988</span>Rambo III</li></ul></div>
+        <div class="m-card"><div class="m-card-name">USA · Domestic</div><div class="m-card-count">18 films · decade total</div><ul><li><span class="year">1980</span>Raging Bull</li><li><span class="year">1987</span>Wall Street</li><li><span class="year">1988</span>Die Hard</li></ul></div>
+        <div class="m-card"><div class="m-card-name">Middle East</div><div class="m-card-count">2 films · decade total</div><ul><li><span class="year">1985</span>Iron Eagle</li><li><span class="year">1986</span>Top Gun</li></ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 -->
+<section class="style-card style-04" id="s04">
+  <div class="style-label"><span><span class="num">04 / 05 ·</span> <span class="name">Tufte Minimal</span></span><span class="refs">Edward Tufte · ET Book · Visual Display of QI</span></div>
+  <div class="mockup">
+    <div class="m-hero">
+      <div class="m-eyebrow">A villain-origins dossier, 1940–2025</div>
+      <h2 class="m-title">The Changing Face of the Villain</h2>
+      <p class="m-dek">We tagged the primary antagonist in roughly 500 Hollywood films and plotted the result across eight decades. Nazis dominate the 1940s. Soviets take over for forty years, fade in the 1990s, then come back after 2014.</p>
+    </div>
+    <div class="m-exhibit">
+      <div class="m-exhibit-label">Exhibit I. An overview</div>
+      <h3 class="m-exhibit-h">All eleven origins, in one chart</h3>
+      <p class="m-exhibit-deck">The same data, stacked into a single flowing chart. Each ribbon is one origin; its thickness in any decade is the number of villains we tagged to that origin.</p>
+      <div class="m-chart-wrap" data-stream="04">
+        <div class="m-margin-note">Sidenote. Wiggle offset balances the ribbon centerline rather than pinning it to zero, so peaks read by area rather than by absolute position.</div>
+      </div>
+    </div>
+    <div class="m-controls">
+      <span class="m-control-label">decade</span>
+      <button class="m-pill">1940s</button>
+      <button class="m-pill">1960s</button>
+      <button class="m-pill on">1980s</button>
+      <button class="m-pill">2000s</button>
+      <button class="m-pill">2020s</button>
+      <span class="m-control-label" style="margin-left:auto">US, domestic</span>
+      <button class="m-toggle">included</button>
+    </div>
+    <div class="m-panel">
+      <div class="m-panel-title">The 1980s. Cold War's last act.</div>
+      <div class="m-cards">
+        <div class="m-card"><div class="m-card-name">Russia / USSR</div><div class="m-card-count">16 films</div><ul><li><span class="year">1984</span>Red Dawn</li><li><span class="year">1985</span>Rocky IV</li><li><span class="year">1988</span>Rambo III</li></ul></div>
+        <div class="m-card"><div class="m-card-name">USA · domestic</div><div class="m-card-count">18 films</div><ul><li><span class="year">1980</span>Raging Bull</li><li><span class="year">1987</span>Wall Street</li><li><span class="year">1988</span>Die Hard</li></ul></div>
+        <div class="m-card"><div class="m-card-name">Middle East</div><div class="m-card-count">2 films</div><ul><li><span class="year">1985</span>Iron Eagle</li><li><span class="year">1986</span>Top Gun</li></ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 -->
+<section class="style-card style-05" id="s05">
+  <div class="style-label"><span><span class="num">05 / 05 ·</span> <span class="name">Japanese Comic Book</span></span><span class="refs">Shōnen manga · halftone pop · panel-grid</span></div>
+  <div class="mockup">
+    <div class="m-hero">
+      <span class="m-eyebrow">DOSSIER · 1940 → 2025</span>
+      <h2 class="m-title">THE CHANGING FACE OF THE <span class="pop">VILLAIN!</span></h2>
+      <p class="m-dek"><strong>WE TAGGED THE PRIMARY ANTAGONIST</strong> in roughly 500 Hollywood films and plotted the result across eight decades. Nazis dominate the 1940s. Soviets take over for forty years, fade in the 1990s, then come back after 2014.</p>
+    </div>
+    <div class="m-exhibit">
+      <h3 class="m-exhibit-h">All eleven origins, in one chart!</h3>
+      <div class="m-exhibit-label">Exhibit I · Overview</div>
+      <p class="m-exhibit-deck">The same data, stacked into a single flowing chart. Each ribbon is one origin; its thickness in any decade is the number of villains we tagged to that origin.</p>
+      <div class="m-chart-wrap" data-stream="05"></div>
+    </div>
+    <div class="m-controls">
+      <span class="m-control-label">DECADE</span>
+      <button class="m-pill">1940s</button>
+      <button class="m-pill">1960s</button>
+      <button class="m-pill on">1980s</button>
+      <button class="m-pill">2000s</button>
+      <button class="m-pill">2020s</button>
+      <span class="m-control-label" style="margin-left:auto">US · DOMESTIC</span>
+      <button class="m-toggle">Included!</button>
+    </div>
+    <div class="m-panel">
+      <div class="m-panel-title">The 1980s · Cold War's Last Act</div>
+      <div class="m-cards">
+        <div class="m-card"><div class="m-card-name">Russia / USSR</div><div class="m-card-count">16 films</div><ul><li><span class="year">1984</span>Red Dawn</li><li><span class="year">1985</span>Rocky IV</li><li><span class="year">1988</span>Rambo III</li></ul></div>
+        <div class="m-card"><div class="m-card-name">USA · Domestic</div><div class="m-card-count">18 films</div><ul><li><span class="year">1980</span>Raging Bull</li><li><span class="year">1987</span>Wall Street</li><li><span class="year">1988</span>Die Hard</li></ul></div>
+        <div class="m-card"><div class="m-card-name">Middle East</div><div class="m-card-count">2 films</div><ul><li><span class="year">1985</span>Iron Eagle</li><li><span class="year">1986</span>Top Gun</li></ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* =====================================================================
+   STATIC STREAMGRAPH GENERATOR
+   Same mini-dataset, different palettes per style. Hand-static — no
+   interactivity needed for the explorer.
+   ===================================================================== */
+const miniData = [
+  {decade: 1940, Russia: 6,  Germany: 16, USA: 2,  ME: 0,  China: 0},
+  {decade: 1950, Russia: 9,  Germany: 4,  USA: 5,  ME: 0,  China: 1},
+  {decade: 1960, Russia: 12, Germany: 3,  USA: 7,  ME: 1,  China: 1},
+  {decade: 1970, Russia: 10, Germany: 2,  USA: 14, ME: 1,  China: 1},
+  {decade: 1980, Russia: 16, Germany: 2,  USA: 18, ME: 2,  China: 1},
+  {decade: 1990, Russia: 8,  Germany: 2,  USA: 20, ME: 5,  China: 2},
+  {decade: 2000, Russia: 6,  Germany: 1,  USA: 22, ME: 14, China: 2},
+  {decade: 2010, Russia: 12, Germany: 1,  USA: 24, ME: 8,  China: 3},
+  {decade: 2020, Russia: 14, Germany: 1,  USA: 14, ME: 3,  China: 4},
+];
+const layerKeys = ["Germany", "Russia", "ME", "USA", "China"];
+const labels = { Germany: "GERMANY", Russia: "RUSSIA / USSR", ME: "MIDDLE EAST", USA: "USA · DOMESTIC", China: "CHINA" };
+
+const palettes = {
+  "01": { Germany: "#5b6770", Russia: "#c0392b", ME: "#c69a4d", USA: "#8a8174", China: "#8a4a3d", axis: "#a39a86", tick: "#6a6a6a", label: "#1a1a1a" },
+  "02": { Germany: "#3a4250", Russia: "#7a2820", ME: "#b88a4a", USA: "#9a7a52", China: "#6b3a36", axis: "#231e16", tick: "#3a3128", label: "#1a140c" },
+  "03": { Germany: "#1a1a1a", Russia: "#9a3022", ME: "#d8a44a", USA: "#2a4d8a", China: "#5a1f1f", axis: "#1a1a1a", tick: "#1a1a1a", label: "#fff" },
+  "04": { Germany: "#888", Russia: "#3a3a3a", ME: "#bcbcbc", USA: "#6a6a6a", China: "#a83a2a", axis: "#888", tick: "#666", label: "#111" },
+  "05": { Germany: "#1a1a1a", Russia: "#d9304a", ME: "#2a8acb", USA: "#f5d442", China: "#6e1f1f", axis: "#1a1a1a", tick: "#1a1a1a", label: "#1a1a1a" },
+};
+
+document.querySelectorAll(".m-chart-wrap[data-stream]").forEach(wrap => {
+  const styleId = wrap.dataset.stream;
+  const palette = palettes[styleId];
+  const W = 880, H = 340;
+  const margin = { top: 20, right: 24, bottom: 36, left: 24 };
+  const innerW = W - margin.left - margin.right;
+  const innerH = H - margin.top - margin.bottom;
+  const svg = d3.select(wrap).append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`).attr("preserveAspectRatio","xMidYMid meet")
+    .style("width","100%").style("height","auto").style("display","block");
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const customOrder = ["Germany", "Russia", "ME", "China", "USA"];
+  const orderIdx = customOrder.map(k => layerKeys.indexOf(k));
+  const stack = d3.stack().keys(layerKeys).offset(d3.stackOffsetWiggle).order(() => orderIdx);
+  const series = stack(miniData);
+
+  const xScale = d3.scaleLinear().domain([1940, 2020]).range([20, innerW - 20]);
+  const yMin = d3.min(series, l => d3.min(l, d => d[0]));
+  const yMax = d3.max(series, l => d3.max(l, d => d[1]));
+  const yScale = d3.scaleLinear().domain([yMin, yMax]).range([innerH - 14, 14]);
+
+  const area = d3.area()
+    .x(d => xScale(d.data.decade))
+    .y0(d => yScale(d[0]))
+    .y1(d => yScale(d[1]))
+    .curve(d3.curveBasis);
+
+  g.selectAll(".layer").data(series).enter().append("path")
+    .attr("class", "layer")
+    .attr("d", area)
+    .style("fill", d => palette[d.key]);
+
+  // labels
+  const lightFills = new Set(["ME", "USA"]); // styles where these need dark text
+  series.forEach(layer => {
+    let bestI = 0, bestW = 0;
+    layer.forEach((pt, i) => { const w = pt[1] - pt[0]; if (w > bestW) { bestW = w; bestI = i; } });
+    if (bestW < 3) return;
+    const pt = layer[bestI];
+    const cx = xScale(pt.data.decade);
+    const cy = yScale((pt[0] + pt[1]) / 2);
+    // pick label fill based on style + key
+    let labelFill = "#fff";
+    if (styleId === "01") labelFill = (layer.key === "ME" || layer.key === "USA") ? "#1a1a1a" : "#fff";
+    if (styleId === "02") labelFill = (layer.key === "ME") ? "#1a140c" : "#efe6d2";
+    if (styleId === "03") labelFill = (layer.key === "ME") ? "#1a1a1a" : "#fff";
+    if (styleId === "04") labelFill = (layer.key === "ME") ? "#111" : "#fff";
+    if (styleId === "05") labelFill = (layer.key === "USA" || layer.key === "ME") ? "#1a1a1a" : "#fff";
+    g.append("text")
+      .attr("class","stream-label")
+      .attr("x", cx).attr("y", cy)
+      .attr("text-anchor","middle").attr("dominant-baseline","middle")
+      .style("fill", labelFill)
+      .text(labels[layer.key]);
+  });
+
+  // decade ticks
+  const tickG = g.append("g");
+  [1940, 1960, 1980, 2000, 2020].forEach(d => {
+    const x = xScale(d);
+    tickG.append("line")
+      .attr("x1", x).attr("x2", x)
+      .attr("y1", innerH + 2).attr("y2", innerH + 6)
+      .attr("stroke", palette.tick).attr("opacity", 0.7);
+    tickG.append("text").attr("class","tick")
+      .attr("x", x).attr("y", innerH + 20).attr("text-anchor","middle")
+      .style("fill", palette.tick).text(d + "s");
+  });
+});
+</script>
+</body>
+</html>
